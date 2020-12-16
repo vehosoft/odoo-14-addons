@@ -16,13 +16,14 @@ class MailTemplate(models.Model):
     _inherit = "mail.template"
 
     def generate_email(self, res_ids, fields):
+        _logger.debug('===== MailTemplate generate_email res_ids = %r',res_ids)
         multi_mode = True
         if isinstance(res_ids, int):
             res_ids = [res_ids]
             multi_mode = False
-        values = super(MailTemplate, self).generate_email(res_ids, fields)
-        #_logger.debug('===== MailTemplate generate_email values = %r',values)
         if self.model == 'account.move':
+            values = super(MailTemplate, self).generate_email(res_ids, fields)
+            _logger.debug('===== MailTemplate generate_email values = %r',values)
             results = dict()
             for lang, (template, template_res_ids) in self._classify_per_lang(res_ids).items():
                 for res_id in template_res_ids:
@@ -34,5 +35,7 @@ class MailTemplate(models.Model):
                             xml = base64.b64encode(record.cfdi_xml.encode('utf8'))
                             attachments.append((report_name, xml))
                             values[res_id].update( attachments=attachments)
-        return values
+            return values
+        else:
+            return super(MailTemplate, self).generate_email(res_ids, fields)
 
