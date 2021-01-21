@@ -96,6 +96,25 @@ class AccountMove(models.Model):
             self.cfdi_forma_pago = fp_pd
         return res
     
+    def action_wizard_timbrar_cfdi(self):
+        compose_form = self.env.ref('facturatool_cfdi.view_account_move_wizard__timbrar_cfdi_form', raise_if_not_found=False)
+        ctx = dict(
+            default_model='account.move',
+            default_res_id=self.id,
+        )
+        _logger.debug('===== action_wizard_timbrar_cfdi ctx = %r',ctx)
+        return {
+            'name': 'Generar CFDI',
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'account.move.cfdi.wizard',
+            'views': [(compose_form.id, 'form')],
+            'view_id': compose_form.id,
+            'target': 'new',
+            'context': ctx,
+        }
+     
     def action_timbrar_cfdi(self):
         status = False
         invoices = self.filtered(lambda inv: inv.cfdi_state == 'draft')

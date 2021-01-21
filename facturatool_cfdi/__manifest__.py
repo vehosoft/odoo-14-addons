@@ -17,6 +17,7 @@
 		'views/partner_views.xml',
 		'views/product_views.xml',
 		'views/account_views.xml',
+		'wizard/account_move_timbrar_views.xml',
 		'views/report_invoice.xml',
 	],
 	'qweb': [

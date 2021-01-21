@@ -34,26 +34,43 @@
 						</field>
 				</record>
 
+				<record model="ir.ui.view" id="view_account_invoice_cfdi_filter">
+						<field name="name">account.invoice.cfdi.select</field>
+						<field name="model">account.move</field>
+						<field name="inherit_id" ref="account.view_account_invoice_filter" />
+						<field name="arch" type="xml">
+								<filter name="cancel" position="after">
+									<separator/>
+									<filter name="cfdi_draft" string="Sin CFDI" domain="[('cfdi_state','=','draft')]"/>
+									<filter name="cfdi_done" string="CFDI Timbrado" domain="[('cfdi_state','=','done')]"/>
+									<filter name="cfdi_cancel" string="CFDI Cancelado" domain="[('cfdi_state','=','cancel')]"/>
+								</filter>
+								<xpath expr='//group/filter[@name="status"]' position="after">
+									<filter name="status_cfdi" string="Estado del CFDI" context="{'group_by':'cfdi_state'}"/>
+								</xpath>
+						</field>
+				</record>
+
 				<record model="ir.ui.view" id="view_account_invoice_cfdi_form">
 						<field name="name">account.invoice.cfdi.form</field>
 						<field name="model">account.move</field>
 						<field name="inherit_id" ref="account.view_move_form" />
 						<field name="arch" type="xml">
 								<field name="state" position="before">
-									<button name="action_timbrar_cfdi" type="object" string="Timbrar CFDI"
+									<button name="action_wizard_timbrar_cfdi" type="object" string="Timbrar CFDI"
 										attrs="{'invisible':['|','|','|',('move_type','!=','out_invoice'),('cfdi_state', '!=', 'draft'),('state','=','draft'),('state','=','cancel')]}"
-										class="oe_highlight" groups="account.group_account_invoice" confirm="Realmente desea timbrar la Factura?  .. Servicio de timbrado FacturaTool, costo: 1 timbre"/>
+										class="oe_highlight" groups="account.group_account_invoice"/>
 								</field>
 								<field name="partner_id" position="after">
-									<field name="cfdi_uso" attrs="{'readonly':[('cfdi_state','!=','draft')],'required':[('move_type','=','out_invoice')],'invisible':[('move_type','!=','out_invoice')]}"/>
+									<field name="cfdi_uso" attrs="{'readonly':[('cfdi_state','!=','draft')],'invisible':['|',('move_type','!=','out_invoice'),('cfdi_state','=','draft')]}"/>
 								</field>
 								<field name="invoice_date" position="after">
-									<field name="cfdi_hora" widget="float_time" attrs="{'readonly':[('cfdi_state','!=','draft')],'required':[('move_type','=','out_invoice')],'invisible':[('move_type','!=','out_invoice')]}"/>
-									<field name="cfdi_state" attrs="{'readonly':[('move_type','=','out_invoice')],'invisible':[('move_type','!=','out_invoice')]}"/>
-									<field name="cfdi_serie" attrs="{'readonly':[('cfdi_state','!=','draft')],'required':[('move_type','=','out_invoice')],'invisible':[('move_type','!=','out_invoice')]}"/>
+									<field name="cfdi_hora" widget="float_time" attrs="{'readonly':[('cfdi_state','!=','draft')],'invisible':['|',('move_type','!=','out_invoice'),('cfdi_state','=','draft')]}"/>
+									<field name="cfdi_state" attrs="{'readonly':[('move_type','=','out_invoice')],'invisible':['|',('move_type','!=','out_invoice'),('cfdi_state','=','draft')]}"/>
+									<field name="cfdi_serie" attrs="{'readonly':[('cfdi_state','!=','draft')],'invisible':['|',('move_type','!=','out_invoice'),('cfdi_state','=','draft')]}"/>
 									<field name="cfdi_folio" attrs="{'invisible':['|',('move_type','!=','out_invoice'),('cfdi_state','=','draft')],'readonly':[('move_type','=','out_invoice')]}"/>
-									<field name="cfdi_metodo_pago" attrs="{'readonly':[('cfdi_state','!=','draft')],'required':[('move_type','=','out_invoice')],'invisible':[('move_type','!=','out_invoice')]}"/>
-									<field name="cfdi_forma_pago" attrs="{'readonly':['|',('cfdi_state','!=','draft'),('cfdi_metodo_pago','=','PPD')],'required':[('move_type','=','out_invoice')],'invisible':[('move_type','!=','out_invoice')]}"/>
+									<field name="cfdi_metodo_pago" attrs="{'readonly':[('cfdi_state','!=','draft')],'invisible':['|',('move_type','!=','out_invoice'),('cfdi_state','=','draft')]}"/>
+									<field name="cfdi_forma_pago" attrs="{'readonly':['|',('cfdi_state','!=','draft'),('cfdi_metodo_pago','=','PPD')],'invisible':['|',('move_type','!=','out_invoice'),('cfdi_state','=','draft')]}"/>
 									<field name="cfdi_uuid" attrs="{'invisible':['|',('move_type','!=','out_invoice'),('cfdi_state','=','draft')],'readonly':[('move_type','=','out_invoice')]}"/>
 								</field>
 								<xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='name']" position="after">
