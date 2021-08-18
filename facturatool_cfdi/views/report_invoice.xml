@@ -2,279 +2,277 @@
 <odoo>
 		<data>
 			<template id="report_invoice_document" inherit_id="account.report_invoice_document">
-				<xpath expr="//t[@t-set='address']" position="replace">
-				</xpath>
-				<xpath expr="//div[@class='page']" position="replace">
+				<xpath expr="//t[@t-call='web.external_layout']" position="replace">
+					<t t-call="facturatool_account.cfdi_layout">
+						<t t-set="o" t-value="o.with_context(lang=lang)" />
 						<div class="page">
-								<div class="row mt32 mb32">
-									<div class="col-5">
+							<div class="row mt32 mb32">
+								<div class="col-5">
 
-										<div style="font-weight: bold;background-color: #cecece;">Receptor / Cliente</div>
-										<div t-if="o.partner_id.company_type=='person' " t-field="o.partner_id.name"/>
-										<div t-if="o.partner_id.company_type=='company'" t-field="o.partner_id.razon_social"/>
-										<div t-if="o.partner_id.vat">RFC: <span t-field="o.partner_id.vat"/></div>
-										<div style="font-size: 11px;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-												USO CFDI: <span t-field="o.cfdi_uso.code"/> - <span t-field="o.cfdi_uso.name"/>
-										</div>
-										<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">Folio Fiscal</div>
-										<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-												<span t-field="o.cfdi_uuid"/>
-										</div>
+									<div style="font-weight: bold;background-color: #cecece;">Receptor / Cliente</div>
+									<div t-if="o.partner_id.company_type=='person' " t-field="o.partner_id.name"/>
+									<div t-if="o.partner_id.company_type=='company'" t-field="o.partner_id.razon_social"/>
+									<div t-if="o.partner_id.vat">RFC: <span t-field="o.partner_id.vat"/></div>
+									<div style="font-size: 11px;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+											USO CFDI: <span t-field="o.cfdi_uso.code"/> - <span t-field="o.cfdi_uso.name"/>
 									</div>
-									<div class="col-4 text-center">
-										<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">F. Certificacion</div>
-										<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-														<span t-field="o.cfdi_fecha_timbrado"/>
-										</div>
-										<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">No. Certificado Digital</div>
-										<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-												<span t-field="o.cfdi_serie_csd"/>
-										</div>
-										<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">No. Certificado SAT</div>
-										<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-												<span t-field="o.cfdi_serie_sat"/>
-										</div>
-
-									</div>
-									<div class="col-3 text-center">
-											<t t-if="o.move_type == 'out_invoice'">
-													<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'draft'">Nota de Venta borrador</div>
-													<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'posted' and o.cfdi_state == 'draft'">Nota de Venta</div>
-													<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'cancel' and o.cfdi_state == 'draft'">Nota de Venta cancelada</div>
-													<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'posted' and o.cfdi_state == 'done'">FACTURA</div>
-													<div style="font-weight: bold; background-color: #cecece;;" t-if="o.move_type == 'out_invoice' and o.state == 'cancel' and o.cfdi_state == 'cancel'">Factura cancelada</div>
-													<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-															<span t-field="o.cfdi_serie"/> <span t-field="o.cfdi_folio"/>
-													</div>
-													<div t-if="o.move_type == 'out_invoice' and (o.state == 'draft' or o.state == 'posted') and o.cfdi_state == 'draft'"><span t-field="o.name"/></div>
-													<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'posted' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">TipoDeComprobante</div>
-													<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-															Ingreso
-													</div>
-													<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'posted' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">F. Emision</div>
-													<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-															<span t-field="o.invoice_date"/> <span t-field="o.cfdi_hora_str"/>
-													</div>
-
-											</t>
+									<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">Folio Fiscal</div>
+									<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+											<span t-field="o.cfdi_uuid"/>
 									</div>
 								</div>
+								<div class="col-4 text-center">
+									<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">F. Certificacion</div>
+									<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+													<span t-field="o.cfdi_fecha_timbrado"/>
+									</div>
+									<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">No. Certificado Digital</div>
+									<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+											<span t-field="o.cfdi_serie_csd"/>
+									</div>
+									<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">No. Certificado SAT</div>
+									<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+											<span t-field="o.cfdi_serie_sat"/>
+									</div>
+
+								</div>
+								<div class="col-3 text-center">
+										<t t-if="o.move_type == 'out_invoice'">
+												<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'draft'">Nota de Venta borrador</div>
+												<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'posted' and o.cfdi_state == 'draft'">Nota de Venta</div>
+												<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'cancel' and o.cfdi_state == 'draft'">Nota de Venta cancelada</div>
+												<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'posted' and o.cfdi_state == 'done'">FACTURA</div>
+												<div style="font-weight: bold; background-color: #cecece;;" t-if="o.move_type == 'out_invoice' and o.state == 'cancel' and o.cfdi_state == 'cancel'">Factura cancelada</div>
+												<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+														<span t-field="o.cfdi_serie"/> <span t-field="o.cfdi_folio"/>
+												</div>
+												<div t-if="o.move_type == 'out_invoice' and (o.state == 'draft' or o.state == 'posted') and o.cfdi_state == 'draft'"><span t-field="o.name"/></div>
+												<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'posted' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">TipoDeComprobante</div>
+												<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+														Ingreso
+												</div>
+												<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'posted' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">F. Emision</div>
+												<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+														<span t-field="o.invoice_date"/> <span t-field="o.cfdi_hora_str"/>
+												</div>
+
+										</t>
+								</div>
+							</div>
 
 
-								<t t-set="display_discount" t-value="any([l.discount for l in o.invoice_line_ids])"/>
+							<t t-set="display_discount" t-value="any([l.discount for l in o.invoice_line_ids])"/>
 
-								<table class="table table-sm o_main_table" name="invoice_line_table">
-										<thead>
-												<tr style="background-color: #cecece;">
+							<table class="table table-sm o_main_table" name="invoice_line_table">
+								<thead>
+										<tr style="background-color: #cecece;">
+												<!-- TODO: remove in master -->
+												<t t-set="colspan" t-value="6"/>
+												<th  t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')" class="text-left"><span>ClaveProdServ</span></th>
+												<th  t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')" class="text-left"><span>No. Identificacion</span></th>
+												<th class="text-right"><span>Cantidad</span></th>
+												<th class="text-left"><span>Descripcion</span></th>
+												<th t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Valor Unitario</span></th>
+												<th t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+														<span>Disc.(%)</span>
 														<!-- TODO: remove in master -->
-														<t t-set="colspan" t-value="6"/>
-														<th  t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')" class="text-left"><span>ClaveProdServ</span></th>
-														<th  t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')" class="text-left"><span>No. Identificacion</span></th>
-														<th class="text-right"><span>Cantidad</span></th>
-														<th class="text-left"><span>Descripcion</span></th>
-														<th t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Valor Unitario</span></th>
-														<th t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-																<span>Disc.(%)</span>
-																<!-- TODO: remove in master -->
-																<t t-set="colspan" t-value="colspan+1"/>
-														</th>
-														<th t-if="o.cfdi_state == 'draft'" t-attf-class="text-left {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Impuestos</span></th>
-														<th class="text-right">
-																<span groups="account.group_show_line_subtotals_tax_excluded">Importe</span>
-																<span groups="account.group_show_line_subtotals_tax_included">Total</span>
-														</th>
-												</tr>
-										</thead>
-										<tbody class="invoice_tbody">
-												<t t-set="current_subtotal" t-value="0"/>
+														<t t-set="colspan" t-value="colspan+1"/>
+												</th>
+												<th t-if="o.cfdi_state == 'draft'" t-attf-class="text-left {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Impuestos</span></th>
+												<th class="text-right">
+														<span groups="account.group_show_line_subtotals_tax_excluded">Importe</span>
+														<span groups="account.group_show_line_subtotals_tax_included">Total</span>
+												</th>
+										</tr>
+								</thead>
+								<tbody class="invoice_tbody">
+									<t t-set="current_subtotal" t-value="0"/>
 
-												<t t-foreach="o.invoice_line_ids" t-as="line">
+									<t t-foreach="o.invoice_line_ids" t-as="line">
 
-														<t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
-														<t t-set="current_subtotal" t-value="current_subtotal + line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
+											<t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+											<t t-set="current_subtotal" t-value="current_subtotal + line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
 
-														<tr t-att-class="'bg-200 font-weight-bold o_line_section' if line.display_type == 'line_section' else 'font-italic o_line_note' if line.display_type == 'line_note' else ''">
-																<t t-if="not line.display_type" name="account_invoice_line_accountable">
-																		<td  t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')"><span t-field="line.clave_sat.code"/></td>
-																		<td  t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')"><span t-field="line.number_ident"/></td>
-																		<td class="text-right">
-																				<span t-field="line.quantity"/>
-																				<span t-field="line.product_uom_id"  groups="uom.group_uom"/>
-																				<span t-field="line.product_uom_id.clave_sat"/>
-																		</td>
-																		<td name="account_invoice_line_name"><span t-field="line.name"/></td>
-																		<td t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-																				<span t-field="line.price_unit"/>
-																		</td>
-																		<td t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-																				<span t-field="line.discount"/>
-																		</td>
-																		<td t-if="o.cfdi_state == 'draft'" t-attf-class="text-left {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-																				<span t-esc="', '.join(map(lambda x: (x.description or x.name), line.tax_ids))"/>
-																		</td>
-																		<td class="text-right o_price_total">
-																				<span t-field="line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
-																				<span t-field="line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
-																		</td>
-																</t>
-																<t t-if="line.display_type == 'line_section'">
-																		<td colspan="99">
-																				<span t-field="line.name"/>
-																		</td>
-																		<t t-set="current_section" t-value="line"/>
-																		<t t-set="current_subtotal" t-value="0"/>
-																</t>
-																<t t-if="line.display_type == 'line_note'">
-																		<td colspan="99">
-																				<span t-field="line.name"/>
-																		</td>
-																</t>
-														</tr>
-														<tr t-foreach="line.tax_ids" t-as="tax" t-if="not line.display_type and o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-															<t t-set="tax_importe" t-value="tax.amount * line.price_subtotal"/>
-															<td></td>
-															<td></td>
-															<td></td>
-															<td t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-															</td>
+											<tr t-att-class="'bg-200 font-weight-bold o_line_section' if line.display_type == 'line_section' else 'font-italic o_line_note' if line.display_type == 'line_note' else ''">
+													<t t-if="not line.display_type" name="account_invoice_line_accountable">
+															<td  t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')"><span t-field="line.clave_sat.code"/></td>
+															<td  t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')"><span t-field="line.number_ident"/></td>
 															<td class="text-right">
-																<div style="font-size: 11px;">Impuesto: <t t-esc="tax.clave_sat"/> <t t-esc="tax.name"/></div>
-																<div style="font-size: 11px;">TipoFactor: <t t-esc="tax.tipo_factor_sat"/></div>
+																	<span t-field="line.quantity"/>
+																	<span t-field="line.product_uom_id"  groups="uom.group_uom"/>
+																	<span t-field="line.product_uom_id.clave_sat"/>
 															</td>
-															<td class="o_price_total text-right" colspan="2">
-																<div style="font-size: 11px;">TasaOCuota: <t t-esc="tax.amount"/></div>
-																<div style="font-size: 11px;">Importe: <t t-esc="tax_importe"/></div>
+															<td name="account_invoice_line_name"><span t-field="line.name"/></td>
+															<td t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+																	<span t-field="line.price_unit"/>
 															</td>
-														</tr>
+															<td t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+																	<span t-field="line.discount"/>
+															</td>
+															<td t-if="o.cfdi_state == 'draft'" t-attf-class="text-left {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+																	<span t-esc="', '.join(map(lambda x: (x.description or x.name), line.tax_ids))"/>
+															</td>
+															<td class="text-right o_price_total">
+																	<span t-field="line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+																	<span t-field="line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
+															</td>
+													</t>
+													<t t-if="line.display_type == 'line_section'">
+															<td colspan="99">
+																	<span t-field="line.name"/>
+															</td>
+															<t t-set="current_section" t-value="line"/>
+															<t t-set="current_subtotal" t-value="0"/>
+													</t>
+													<t t-if="line.display_type == 'line_note'">
+															<td colspan="99">
+																	<span t-field="line.name"/>
+															</td>
+													</t>
+											</tr>
+											<tr t-foreach="line.tax_ids" t-as="tax" t-if="not line.display_type and o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+												<t t-set="tax_importe" t-value="tax.amount * line.price_subtotal"/>
+												<td></td>
+												<td></td>
+												<td></td>
+												<td t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
+												</td>
+												<td class="text-right">
+													<div style="font-size: 11px;">Impuesto: <t t-esc="tax.clave_sat"/> <t t-esc="tax.name"/></div>
+													<div style="font-size: 11px;">TipoFactor: <t t-esc="tax.tipo_factor_sat"/></div>
+												</td>
+												<td class="o_price_total text-right" colspan="2">
+													<div style="font-size: 11px;">TasaOCuota: <t t-esc="tax.amount"/></div>
+													<div style="font-size: 11px;">Importe: <t t-esc="tax_importe"/></div>
+												</td>
+											</tr>
 
 
-														<t t-if="current_section and (line_last or o.invoice_line_ids[line_index+1].display_type == 'line_section')">
-																<tr class="is-subtotal text-right">
-																		<td colspan="99">
-																				<strong class="mr16">Subtotal</strong>
-																				<span
-																						t-esc="current_subtotal"
-																						t-options='{"widget": "monetary", "display_currency": o.currency_id}'
-																				/>
-																		</td>
-																</tr>
-														</t>
-												</t>
-										</tbody>
-								</table>
+											<t t-if="current_section and (line_last or o.invoice_line_ids[line_index+1].display_type == 'line_section')">
+													<tr class="is-subtotal text-right">
+															<td colspan="99">
+																	<strong class="mr16">Subtotal</strong>
+																	<span
+																			t-esc="current_subtotal"
+																			t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+																	/>
+															</td>
+													</tr>
+											</t>
+									</t>
+								</tbody>
+							</table>
 
-								<div class="clearfix">
-										<div id="total" class="row">
-												<div class="col-8">
-													<p t-if="o.cfdi_metodo_pago" name="note">
-															Metodo de Pago: <span t-field="o.cfdi_metodo_pago"/>
-													</p>
-													<p t-if="o.cfdi_forma_pago" name="note">
-															Forma de Pago: <span t-field="o.cfdi_forma_pago.code"/> <span t-field="o.cfdi_forma_pago.name"/>
-													</p>
-													<p t-if="o.invoice_payment_term_id" name="payment_term">
-															<span t-field="o.invoice_payment_term_id.note"/>
-													</p>
-													<p t-if="o.narration" name="comment">
-															Nota: <span t-field="o.narration"/>
-													</p>
-												</div>
-												<div t-attf-class="#{'col-4' if report_type != 'html' else 'col-sm-7 col-md-5'}">
-														<table class="table table-sm;page-break-inside: avoid;">
-																<tr class="border-black o_subtotal" style="">
-																		<td><strong>Subtotal</strong></td>
-																		<td class="text-right">
-																				<span t-field="o.amount_untaxed"/>
-																		</td>
-																</tr>
-																<!--
-																<t t-foreach="o.amount_by_group" t-as="amount_by_group">
-																		<tr style="">
-																				<t t-if="len(o.tax_line_ids) == 1 and o.amount_untaxed == amount_by_group[2]">
-																						<td><span t-esc="amount_by_group[0]"/></td>
-																						<td class="text-right o_price_total">
-																								<span t-esc="amount_by_group[3]" />
-																						</td>
-																				</t>
-																				<t t-else="">
-																						<td>
-																								<span t-esc="amount_by_group[0]"/>
-																								<span>&amp;nbsp;<span>on</span>
-																										<t t-esc="amount_by_group[4]"/>
-																								</span>
-																						</td>
-																						<td class="text-right o_price_total">
-																								<span t-esc="amount_by_group[3]"/>
-																						</td>
-																				</t>
-																		</tr>
-																</t>
-																-->
-																<t t-foreach="o.amount_by_group" t-as="amount_by_group">
-																		<tr style="">
-																				<t t-if="len(o.line_ids.filtered(lambda line: line.tax_line_id)) in [0, 1] and o.amount_untaxed == amount_by_group[2]">
-																						<td><span class="text-nowrap" t-esc="amount_by_group[0]"/></td>
-																						<td class="text-right o_price_total">
-																								<span class="text-nowrap" t-esc="amount_by_group[3]"/>
-																						</td>
-																				</t>
-																				<t t-else="">
-																						<td>
-																								<span t-esc="amount_by_group[0]"/>
-																								<span class="text-nowrap"> on
-																										<t t-esc="amount_by_group[4]"/>
-																								</span>
-																						</td>
-																						<td class="text-right o_price_total">
-																								<span class="text-nowrap" t-esc="amount_by_group[3]"/>
-																						</td>
-																				</t>
-																		</tr>
-																</t>
-																<tr class="border-black o_total">
-																		<td><strong>Total</strong></td>
-																		<td class="text-right">
-																				<span class="text-nowrap" t-field="o.amount_total"/>
-																		</td>
-																</tr>
-														</table>
-												</div>
-										</div>
+							<div class="clearfix">
+								<div id="total" class="row">
+									<div class="col-8">
+										<p t-if="o.cfdi_metodo_pago" name="note">
+												Metodo de Pago: <span t-field="o.cfdi_metodo_pago"/>
+										</p>
+										<p t-if="o.cfdi_forma_pago" name="note">
+												Forma de Pago: <span t-field="o.cfdi_forma_pago.code"/> <span t-field="o.cfdi_forma_pago.name"/>
+										</p>
+										<p t-if="o.invoice_payment_term_id" name="payment_term">
+												<span t-field="o.invoice_payment_term_id.note"/>
+										</p>
+										<p t-if="o.narration" name="comment">
+												Nota: <span t-field="o.narration"/>
+										</p>
+									</div>
+									<div t-attf-class="#{'col-4' if report_type != 'html' else 'col-sm-7 col-md-5'}">
+											<table class="table table-sm;page-break-inside: avoid;">
+													<tr class="border-black o_subtotal" style="">
+															<td><strong>Subtotal</strong></td>
+															<td class="text-right">
+																	<span t-field="o.amount_untaxed"/>
+															</td>
+													</tr>
+													<!--
+													<t t-foreach="o.amount_by_group" t-as="amount_by_group">
+															<tr style="">
+																	<t t-if="len(o.tax_line_ids) == 1 and o.amount_untaxed == amount_by_group[2]">
+																			<td><span t-esc="amount_by_group[0]"/></td>
+																			<td class="text-right o_price_total">
+																					<span t-esc="amount_by_group[3]" />
+																			</td>
+																	</t>
+																	<t t-else="">
+																			<td>
+																					<span t-esc="amount_by_group[0]"/>
+																					<span>&amp;nbsp;<span>on</span>
+																							<t t-esc="amount_by_group[4]"/>
+																					</span>
+																			</td>
+																			<td class="text-right o_price_total">
+																					<span t-esc="amount_by_group[3]"/>
+																			</td>
+																	</t>
+															</tr>
+													</t>
+													-->
+													<t t-foreach="o.amount_by_group" t-as="amount_by_group">
+															<tr style="">
+																	<t t-if="len(o.line_ids.filtered(lambda line: line.tax_line_id)) in [0, 1] and o.amount_untaxed == amount_by_group[2]">
+																			<td><span class="text-nowrap" t-esc="amount_by_group[0]"/></td>
+																			<td class="text-right o_price_total">
+																					<span class="text-nowrap" t-esc="amount_by_group[3]"/>
+																			</td>
+																	</t>
+																	<t t-else="">
+																			<td>
+																					<span t-esc="amount_by_group[0]"/>
+																					<span class="text-nowrap"> on
+																							<t t-esc="amount_by_group[4]"/>
+																					</span>
+																			</td>
+																			<td class="text-right o_price_total">
+																					<span class="text-nowrap" t-esc="amount_by_group[3]"/>
+																			</td>
+																	</t>
+															</tr>
+													</t>
+													<tr class="border-black o_total">
+															<td><strong>Total</strong></td>
+															<td class="text-right">
+																	<span class="text-nowrap" t-field="o.amount_total"/>
+															</td>
+													</tr>
+											</table>
+									</div>
 								</div>
+							</div>
 
-								<div class="row"  t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-										<div class="col-12">
-												<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">Cadena original del complemento del certificacion digital del SAT</div>
-												<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-														<span style="font-size: 10px;" t-field="o.cfdi_cadena_original"/>
-												</div>
-										</div>
+							<div class="row"  t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+								<div class="col-12">
+									<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">Cadena original del complemento del certificacion digital del SAT</div>
+									<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+											<span style="font-size: 10px;" t-field="o.cfdi_cadena_original"/>
+									</div>
 								</div>
-								<div class="row" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-										<div class="col-2">
-												<img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('QR', 'https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx&amp;id='+o.cfdi_uuid+'&amp;re='+o.company_id.vat+'&amp;rr='+o.partner_id.vat, 120, 120)" style="margin-top:20px;"/>
-										</div>
-										<div class="col-10">
-												<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">Sello digital del CFDI</div>
-												<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-														<span style="font-size: 10px;" t-field="o.cfdi_sello_digital"/>
-												</div>
-												<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">Sello digital del SAT</div>
-												<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-														<span style="font-size: 10px;" t-field="o.cfdi_sello_sat"/>
-												</div>
-												<div class="text-right">
-														<br/>
-														<b>ESTE DOCUMENTO ES UNA REPRESENTACION IMPRESA DE UN CFDI.</b>
-												</div>
-										</div>
+							</div>
+							<div class="row" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+								<div class="col-2">
+										<img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('QR', 'https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx&amp;id='+o.cfdi_uuid+'&amp;re='+o.company_id.vat+'&amp;rr='+o.partner_id.vat, 120, 120)" style="margin-top:20px;"/>
 								</div>
-
-
-
-
+								<div class="col-10">
+									<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">Sello digital del CFDI</div>
+									<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+											<span style="font-size: 10px;" t-field="o.cfdi_sello_digital"/>
+									</div>
+									<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">Sello digital del SAT</div>
+									<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+											<span style="font-size: 10px;" t-field="o.cfdi_sello_sat"/>
+									</div>
+									<div class="text-right">
+											<br/>
+											<b>ESTE DOCUMENTO ES UNA REPRESENTACION IMPRESA DE UN CFDI.</b>
+									</div>
+								</div>
+							</div>
 						</div>
+					</t>
 				</xpath>
 			</template>
+			
 		</data>
 </odoo>

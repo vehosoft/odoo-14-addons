@@ -2,8 +2,81 @@
 <odoo>
 		<data>
 
+			<template id="cfdi_layout_standard">
+				<div class="header">
+					<div class="row">
+						<div class="col-4 mb4 mt4" style="margin-top:10px;">
+								<img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 45px; max-width:200px;" alt="Logo"/>
+						</div>
+						<div class="col-8 mt4" style="margin-top:10px;">
+							<div t-field="company.name" style="font-size: 18px; font-weight: bold;"/>
+							<div style="font-size: 18px;">RFC: <span t-field="company.vat"/></div>
+							<div style="font-size: 15px;">
+									<span t-field="company.street"/>,
+									<span t-field="company.street2"/>
+							</div>
+							<div style="font-size: 15px;">
+									<span t-field="company.city"/>, <span t-field="company.state_id.code"/>, <span t-field="company.country_id.name"/>, C.P.<span t-field="company.zip"/>
+							</div>
+							<div style="font-size: 12px;"> Regimen Fiscal: <span t-field="company.company_registry"/> </div>
+						</div>
+					</div>
+				</div>
+
+				<div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout"  t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+					<div class="pt-5">
+						<!-- This div ensures that the address is not cropped by the header. -->
+						<t t-call="web.address_layout"/>
+					</div>
+					<t t-raw="0"/>
+				</div>
+
+				<div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
+					<div class="text-center" style="border-top: 1px solid black;">
+						<ul class="list-inline mb4">
+							<!-- using the list-inline-item class from bootstrap causes weird behaviours in pdf report
+								adding d-inline class fixes the problem-->
+							<li t-if="company.phone" class="list-inline-item d-inline"><span class="o_force_ltr" t-field="company.phone"/></li>
+							<li t-if="company.email" class="list-inline-item d-inline"><span t-field="company.email"/></li>
+							<li t-if="company.website" class="list-inline-item d-inline"><span t-field="company.website"/></li>
+							<li t-if="company.vat" class="list-inline-item d-inline"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-field="company.vat"/></li>
+						</ul>
+
+						<div name="financial_infos">
+							<span t-field="company.report_footer"/>
+						</div>
+
+						<div t-if="report_type == 'pdf'" class="text-muted">
+							Page: <span class="page"/> / <span class="topage"/>
+						</div>
+					</div>
+				</div>
+			</template>
+
 			<!-- Public api: layout to t-call from reports -->
 
+			<template id="cfdi_layout">
+				<t t-if="not o" t-set="o" t-value="doc"/>
+
+				<t t-if="not company">
+					<!-- Multicompany -->
+					<t t-if="company_id">
+						<t t-set="company" t-value="company_id"/>
+					</t>
+					<t t-elif="o and 'company_id' in o">
+						<t t-set="company" t-value="o.company_id.sudo()"/>
+					</t>
+					<t t-else="else">
+						<t t-set="company" t-value="res_company"/>
+					</t>
+				</t>
+
+				<t t-call="facturatool_account.cfdi_layout_standard"><t t-raw="0"/></t>
+
+			</template>
+
+			<!-- Public api: layout to t-call from reports -->
+			<!--
 			<template id="external_layout_standard" inherit_id="web.external_layout_standard">
 					<xpath expr="//div[@t-attf-class='header o_company_#{company.id}_layout']" position="replace">
 						<div class="header">
@@ -23,34 +96,13 @@
 												</div>
 												<div style="font-size: 12px;"> Regimen Fiscal: <span t-field="company.company_registry"/> </div>
 										</div>
-										<!--
-										<div class="col-3 text-center" style="margin-top:10px;font-size: 15px;">
-												<t t-if="o.move_type == 'out_invoice'">
-														<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'draft'">Nota de Venta borrador</div>
-														<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'posted' and o.cfdi_state == 'draft'">Nota de Venta</div>
-														<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'cancel' and o.cfdi_state == 'draft'">Nota de Venta cancelada</div>
-														<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'posted' and o.cfdi_state == 'done'">FACTURA</div>
-														<div style="font-weight: bold; background-color: #cecece;;" t-if="o.move_type == 'out_invoice' and o.state == 'cancel' and o.cfdi_state == 'cancel'">Factura cancelada</div>
-														<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-																<span t-field="o.cfdi_serie"/> <span t-field="o.cfdi_folio"/>
-														</div>
-														<div t-if="o.move_type == 'out_invoice' and (o.state == 'draft' or o.state == 'posted') and o.cfdi_state == 'draft'"><span t-field="o.name"/></div>
-														<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'posted' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">TipoDeComprobante</div>
-														<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-																Ingreso
-														</div>
-														<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and o.state == 'posted' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">F. Emision</div>
-														<div t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
-																<span t-field="o.invoice_date"/> <span t-field="o.cfdi_hora_str"/>
-														</div>
-
-												</t>
-										</div>-->
+										
+										
 								</div>
 						</div>
 					</xpath>
 
 			</template>
-
+			-->
 		</data>
 </odoo>

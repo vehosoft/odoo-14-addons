@@ -45,8 +45,9 @@ class AccountMove(models.Model):
     cfdi_trans_id = fields.Char(string='FacturaTool TransID', size=30, copy=False)
     cfdi_uso = fields.Many2one('sat.cfdi.uso', string="Uso del CFDI")
     cfdi_state = fields.Selection([('draft', 'Sin Timbrar'), ('done', 'Trimbrado'), ('cancel', 'Cancelado')], string='Status del CFDI', default='draft', copy=False, track_visibility='onchange')
-    cfdi_hora = fields.Float('Hora factura')
-    cfdi_hora_str = fields.Char('Hora factura Texto',compute='_cfdi_hora_str')
+    cfdi_fecha = fields.Date(string='Fecha Emision CFDI', readonly=True, index=True, copy=False)
+    cfdi_hora = fields.Float('Hora Emision CFDI')
+    cfdi_hora_str = fields.Char('Hora de Emision Texto',compute='_cfdi_hora_str')
     cfdi_serie = fields.Many2one('facturatool.serie', string="Serie")
     cfdi_folio = fields.Char(string='Folio', size=30, copy=False, track_visibility='onchange')
     cfdi_uuid = fields.Char(string='UUID', size=120, copy=False, track_visibility='onchange')
@@ -101,8 +102,11 @@ class AccountMove(models.Model):
         ctx = dict(
             default_model='account.move',
             default_res_id=self.id,
+            default_company_id=self.company_id.id,
         )
         _logger.debug('===== action_wizard_timbrar_cfdi ctx = %r',ctx)
+        payments = self._get_reconciled_info_JSON_values()
+        _logger.debug('===== action_wizard_timbrar_cfdi payments = %r',payments)
         return {
             'name': 'Generar CFDI',
             'type': 'ir.actions.act_window',
@@ -118,9 +122,9 @@ class AccountMove(models.Model):
     def action_timbrar_cfdi(self):
         status = False
         invoices = self.filtered(lambda inv: inv.cfdi_state == 'draft')
-        ft_account = self.env['facturatool.account'].search([('rfc','!=','')], limit=1)
+        ft_account = self.env['facturatool.account'].search([('rfc','!=',''),('company_id','=',invoices[0].company_id.id)], limit=1)
         if ft_account.rfc == False:
-            msg = 'Error #8001: Necesita configurar su cuenta FacturaTool en "Contabilidad/Configuracion/Facturacion Electronica/Cuenta FacturaTool"'
+            msg = 'Error #8001: Necesita configurar su cuenta FacturaTool en "Contabilidad/Configuracion/Facturacion Electronica/Cuenta FacturaTool" para la empresa: '+invoices[0].company_id.name
             raise UserError(msg)
 
         wsdl = 'http://ws.facturatool.com/index.php?wsdl'
@@ -146,6 +150,9 @@ class AccountMove(models.Model):
             for line in invoice.invoice_line_ids:
                 tax_include_on_price = False
                 for tax in line.tax_ids:
+                    factor_tax = 1.00
+                    if tax.amount < 0.00:
+                        factor_tax = -1.00
                     if tax.amount_type=='percent' and tax.type_tax_sat != False:
                         tax_obj = {
                             'Nombre': tax.name,
@@ -153,8 +160,8 @@ class AccountMove(models.Model):
                             'Impuesto': tax.clave_sat,
                             'Base': line.price_subtotal,
                             'TipoFactor': tax.tipo_factor_sat,
-                            'TasaOCuota': (float(tax.amount)/100.00),
-                            'Importe': float(line.price_subtotal) * (float(tax.amount)/100.00),
+                            'TasaOCuota': (float(tax.amount)/100.00) * factor_tax,
+                            'Importe': float(line.price_subtotal) * (float(tax.amount)/100.00) * factor_tax,
                             'indexConcepto': iline
     					}
                         taxes[itax:itax]=[tax_obj]
@@ -181,16 +188,17 @@ class AccountMove(models.Model):
                 if line.discount > 0:
                     discount = discount + line.discount
                     concepto['Descuento'] = line.discount
-
-                conceptos[iline:iline]=[concepto]
-                iline = iline + 1
+                
+                if line.display_type != 'line_section':
+                    conceptos[iline:iline]=[concepto]
+                    iline = iline + 1
 
             params = {
     			'Rfc': ft_account.rfc,
     			'Usuario': ft_account.username,
     			'Password': ft_account.password,
     			'Serie': invoice.cfdi_serie.name,
-    			'Fecha': invoice.invoice_date,
+    			'Fecha': invoice.cfdi_fecha, #invoice.invoice_date,
     			'Hora': invoice.cfdi_hora_str,
     			'FormaPago': invoice.cfdi_forma_pago.code,
     			'MetodoPago': invoice.cfdi_metodo_pago,
@@ -201,7 +209,7 @@ class AccountMove(models.Model):
     			'Conceptos': conceptos,
     			'SubTotal': invoice.amount_untaxed,
     			'Total': invoice.amount_total,
-    			'IdExterno': invoice.name,
+    			'IdExterno': invoice.name+'_'+str(invoice.id),
     			#'Redondeo': 'imp',
     		}
             if len(taxes) > 0:

@@ -10,6 +10,7 @@
                         <field name="rfc"/>
                         <field name="username"/>
                         <field name="password" password="True"/>
+                        <field name="company_id"/>
                     </group>
                 </form>
             </field>
@@ -22,6 +23,7 @@
                 <tree string="Cuenta FacturaTool">
                     <field name="rfc"/>
                     <field name="validate"/>
+                    <field name="company_id"/>
                 </tree>
             </field>
         </record>
@@ -65,7 +67,8 @@
                         <field name="factura"/>
                         <field name="pago"/>
                         <field name="nomina"/>
-                        
+                        <field name="active"/>
+                        <field name="company_id"/>
                     </group>
                 </form>
             </field>
@@ -80,6 +83,7 @@
                     <field name="factura"/>
                     <field name="pago"/>
                     <field name="nomina"/>
+                    <field name="company_id"/>
                 </tree>
             </field>
         </record>

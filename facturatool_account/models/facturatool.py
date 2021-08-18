@@ -14,6 +14,7 @@ class FacturaToolAccount(models.Model):
 	password = fields.Char(string='Password', size=60, index=True,
 					   required=True)
 	validate = fields.Boolean(string='Validada', default=False, readonly=True)
+	company_id = fields.Many2one('res.company', string='Compañia', store=True, required=True, default=lambda self: self.env.company)
 
 
 class FacturaToolSerie(models.Model):
@@ -24,6 +25,8 @@ class FacturaToolSerie(models.Model):
 	factura = fields.Boolean(string='Factura', default=True )
 	pago = fields.Boolean(string='Complemento de Pago', default=False )
 	nomina = fields.Boolean(string='Recibo de Nomina', default=False )
+	active = fields.Boolean(string='Activo', default=True )
+	company_id = fields.Many2one('res.company', string='Compañia', store=True, required=True, default=lambda self: self.env.company)
 
 class SatCFDIUso(models.Model):
 	_name = 'sat.cfdi.uso'

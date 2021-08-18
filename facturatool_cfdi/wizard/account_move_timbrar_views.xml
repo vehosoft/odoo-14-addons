@@ -6,7 +6,7 @@
             <field name="arch" type="xml">
                 <form string="Generar CFDI">
                     <p class="oe_grey">
-                        Se genera un CFDI version 3.3 valido ante el SAT. 
+                        Se genera un CFDI version 3.3 valido ante el SAT. Por favor revise detenidamente los datos antes de emitir el CFDI.
                     </p>
                     <group>
                         <field name="cfdi_uso"/>
@@ -14,7 +14,8 @@
                         <field name="cfdi_hora" widget="float_time"/>
                         <field name="cfdi_serie"/>
                         <field name="cfdi_metodo_pago"/>
-                        <field name="cfdi_forma_pago"/>
+                        <field name="cfdi_forma_pago" attrs="{'readonly':[('cfdi_metodo_pago','=','PPD')]}"/>
+                        <field name="company_id" invisible="1"/>
                     </group>
                     <footer>
                         <button name="action_timbrar_cfdi" id="action_timbrar_cfdi" string="Emitir CFDI" type="object" class="btn-primary"/>
