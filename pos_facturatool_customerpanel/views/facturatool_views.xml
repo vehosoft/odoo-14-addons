@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_facturatool_account_customerpanel_form" model="ir.ui.view">
+            <field name="name">facturatool.account.customerpanel.form</field>
+            <field name="model">facturatool.account</field>
+            <field name="inherit_id" ref="facturatool_account.view_facturatool_account_form" />
+            <field name="priority" eval="14"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group/field[@name='company_id']" position="before">
+                    <field name="cfdi_portal"/>
+                    <field name="cfdi_portal_politica" attrs="{'invisible':[('cfdi_portal', '=', False)]}"/>
+                    <field name="cfdi_portal_host" attrs="{'invisible':[('cfdi_portal', '=', False)]}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

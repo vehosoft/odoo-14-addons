@@ -44,7 +44,7 @@ class AccountMove(models.Model):
 
     cfdi_trans_id = fields.Char(string='FacturaTool TransID', size=30, copy=False)
     cfdi_uso = fields.Many2one('sat.cfdi.uso', string="Uso del CFDI")
-    cfdi_state = fields.Selection([('draft', 'Sin Timbrar'), ('done', 'Trimbrado'), ('cancel', 'Cancelado')], string='Status del CFDI', default='draft', copy=False, track_visibility='onchange')
+    cfdi_state = fields.Selection([('draft', 'Sin Timbrar'), ('done', 'Trimbrado'), ('cancel', 'Cancelado'), ('canceling', 'Cancelando')], string='Status del CFDI', default='draft', copy=False, track_visibility='onchange')
     cfdi_fecha = fields.Date(string='Fecha Emision CFDI', readonly=True, index=True, copy=False)
     cfdi_hora = fields.Float('Hora Emision CFDI')
     cfdi_hora_str = fields.Char('Hora de Emision Texto',compute='_cfdi_hora_str')
@@ -299,3 +299,45 @@ class AccountMove(models.Model):
                 raise UserError(msg)
 
         return {'params': params,'status': status}
+
+    def action_cancel_cfdi(self):
+        wsdl = 'http://ws.facturatool.com/index.php?wsdl'
+        client = zeep.Client(wsdl)
+        for invoice in self:
+            ft_account = self.env['facturatool.account'].search([('rfc','!=',''),('company_id','=',invoice.company_id.id)], limit=1)
+            if ft_account.rfc == False:
+                msg = 'Error #8001: Necesita configurar su cuenta FacturaTool en "Contabilidad/Configuracion/Facturacion Electronica/Cuenta FacturaTool" para la empresa: '+invoices[0].company_id.name
+                raise UserError(msg)
+            #Solicitud al WS
+            params = {
+    			'Rfc': ft_account.rfc,
+    			'Usuario': ft_account.username,
+    			'Password': ft_account.password,
+    			'TransID': invoice.cfdi_trans_id
+            }
+            _logger.debug('===== action_cancel_cfdi params = %r',params)
+            result = client.service.cancelarCFDI(params=params)
+            _logger.debug('===== action_cancel_cfdi result = %r',result)
+            ws_res = json.loads(result)
+            _logger.debug('===== action_cancel_cfdi ws_res = %r',ws_res)
+
+            status = False
+            if ws_res['success'] == True:
+                status = True
+
+                invoice.write({
+    				'cfdi_state':ws_res['state']
+    			})
+                msg = 'Cancelacion exitosa.'
+                if ws_res['state'] == 'canceling': #Mostrar mensaje: 
+                    msg = 'Cancelacion en proceso, espere hasta 72 horas para conocer el resultado de la cancelacion'
+
+            else:
+                if ws_res['error'] is None:
+                    error = "Servicio temporalmente fuera de servicio"
+                else:
+                    error = ws_res['error']
+                msg = 'Error #' + str(ws_res['errno']) + ': ' + error
+                raise UserError(msg)
+            
+        return {'message': msg, 'params': params, 'status': status}

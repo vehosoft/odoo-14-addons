@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="pos_config_cfdi_view_form">
+            <field name="name">pos.config.cfdi.form.view</field>
+            <field name="model">pos.config</field>
+            <field name="inherit_id" ref="point_of_sale.pos_config_view_form" />
+            <field name="priority" eval="14"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@id='receipt']/div[@id='iface_invoicing']/div[@class='o_setting_right_pane']/div[@class='content-group mt16']" position="inside">
+                    <div class="row mt16">
+                        <label string="Serie CDFI" for="cfdi_serie" class="col-lg-3 o_light_label"/>
+                        <field name="cfdi_serie" domain="[('company_id', '=', company_id), ('factura', '=', True)]" attrs="{'required': [('module_account', '=', True)]}" context="{'default_company_id': company_id}"/>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_pos_order_cfdi_form">
+            <field name="name">pos.order.cfdi.form</field>
+            <field name="model">pos.order</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_pos_form" />
+            <field name="priority" eval="14"/>
+            <field name="arch" type="xml">
+                <button name="action_pos_order_invoice" position="replace">
+                    <button name="action_pos_order_invoice" string="Invoice" type="object" confirm="Estas seguro de generar la factura CFDI de este pedido?" attrs="{'invisible': ['|', '|', '|', ('invoice_group', '=', False), ('state','=','draft'), ('state','=','cancel'), ('state','=','invoiced')]}"/>
+                </button>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="pos_payment_method_cfdi_view_form">
+            <field name="name">pos.payment.method.cfdi.form.view</field>
+            <field name="model">pos.payment.method</field>
+            <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form" />
+            <field name="priority" eval="14"/>
+            <field name="arch" type="xml">
+                <field name="cash_journal_id" position="after">
+                    <field name="cfdi_metodo_pago"/>
+                    <field name="cfdi_forma_pago" attrs="{'readonly':[('cfdi_metodo_pago','=','PPD')]}"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

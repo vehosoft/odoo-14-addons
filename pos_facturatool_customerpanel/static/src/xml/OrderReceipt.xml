@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+        <xpath expr="//div[@class='pos-receipt']/div[@class='pos-receipt-order-data']" position="after">
+            <div t-if="receipt.cfdi_portal and (!receipt.to_invoice or !receipt.account_move)"  class="pos-receipt-customer-portal" style="text-align: center;">
+                <div style="text-size: 14px;">--------------------------------</div>
+                <h5>Genera tu Factura Electrónica en línea:</h5>
+                <div style="text-size: 14px;">Sitio: <t t-esc="receipt.cfdi_portal.host" /></div>
+                <br/>
+                <div style="text-size: 14px;">Código de facturación: <strong><t t-esc="receipt.cfdi_ticket_codigo" /></strong> </div>
+                <t t-if="receipt.cfdi_ticket_deadline">
+                    <br/>
+                    <div style="text-size: 14px;">Vigencia: <t t-esc="receipt.cfdi_ticket_deadline" /></div>
+                </t>
+                <img t-att-src="receipt.cfdi_ticket_qr" style="margin-top:20px;margin-bottom:20px;"/>
+            </div>
+        </xpath> 
+    </t>
+</templates>

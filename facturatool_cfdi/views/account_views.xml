@@ -67,6 +67,9 @@
 									<button name="action_wizard_timbrar_cfdi" type="object" string="Timbrar CFDI"
 										attrs="{'invisible':['|','|','|',('move_type','!=','out_invoice'),('cfdi_state', '!=', 'draft'),('state','=','draft'),('state','=','cancel')]}"
 										class="oe_highlight" groups="account.group_account_invoice"/>
+									<button name="action_cancel_cfdi" type="object" string="Cancelar CFDI"
+										attrs="{'invisible':['|',('move_type','!=','out_invoice'),('cfdi_state', '!=', 'done')]}"
+										groups="account.group_account_invoice" confirm="Estas seguro de cancelar el CFDI de esta factura?"/>
 								</field>
 								<field name="partner_id" position="after">
 									<field name="cfdi_uso" attrs="{'readonly':[('cfdi_state','!=','draft')],'invisible':['|',('move_type','!=','out_invoice'),('cfdi_state','=','draft')]}"/>

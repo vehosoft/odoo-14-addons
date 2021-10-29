@@ -2,7 +2,13 @@
 # Code by: Francisco Rodriguez (frodriguez@vehosoft.com).
 
 from odoo import api, fields, models
-
+import json
+import logging
+_logger = logging.getLogger(__name__)
+try:
+    import zeep
+except ImportError:  # pragma: no cover
+    _logger.debug('Cannot import zeep')
 
 class FacturaToolAccount(models.Model):
 	_name = 'facturatool.account'
@@ -15,6 +21,28 @@ class FacturaToolAccount(models.Model):
 					   required=True)
 	validate = fields.Boolean(string='Validada', default=False, readonly=True)
 	company_id = fields.Many2one('res.company', string='Compañia', store=True, required=True, default=lambda self: self.env.company)
+
+	def action_validate(self):
+		wsdl = 'http://ws.facturatool.com/index.php?wsdl'
+		client = zeep.Client(wsdl)
+		params = {
+			'Rfc': self.rfc,
+			'Usuario': self.username,
+			'Password': self.password,
+			'TransID': ''
+		}
+		_logger.debug('===== action_validate validarCuenta params = %r',params)
+		result = client.service.validarCuenta(params=params)
+		_logger.debug('===== action_validate validarCuenta result = %r',result)
+		ws_res = json.loads(result)
+		_logger.debug('===== action_validate validarCuenta ws_res = %r',ws_res)
+
+		if ws_res['success'] == True:
+			self.write({
+				'validate': True
+			})
+		
+		return ws_res
 
 
 class FacturaToolSerie(models.Model):
