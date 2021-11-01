@@ -11,5 +11,15 @@
             <field name="interval_number">30</field>
             <field name="numbercall">-1</field>
         </record>
+        <record id="ir_cron_resend_pos_orders_to_facturatool" model="ir.cron">
+            <field name="name">ReSend POS Orders to FacturaTool Customer Panel</field>
+            <field name="model_id" ref="model_pos_order"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_resend_pos_orders_to_facturatool()</field>
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_type">minutes</field>
+            <field name="interval_number">33</field>
+            <field name="numbercall">-1</field>
+        </record>
     </data>
 </odoo>

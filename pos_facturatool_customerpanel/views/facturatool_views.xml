@@ -14,5 +14,20 @@
                 </xpath>
             </field>
         </record>
+        <record id="view_pos_order_customerpanel_form" model="ir.ui.view">
+            <field name="name">pos.order.customerpanel.form</field>
+            <field name="model">pos.order</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_pos_form" />
+            <field name="priority" eval="14"/>
+            <field name="arch" type="xml">
+                <button name="action_pos_order_invoice" position="after">
+                    <button name="action_send_order_to_facturatool" string="Sincronizar al Panel de Cliente" type="object" attrs="{'invisible': ['|', '|', '|', ('cfdi_ticket_state', '!=', 'pending'), ('state','=','draft'), ('state','=','cancel'), ('state','=','invoiced')]}"/>
+                </button>
+                <field name="partner_id" position="after">
+                    <field string="Codigo de Facturación" name="cfdi_ticket_codigo"/>
+                    <field string="Status del Ticket" name="cfdi_ticket_state"/>
+                </field>
+            </field>
+        </record>
     </data>
 </odoo>
