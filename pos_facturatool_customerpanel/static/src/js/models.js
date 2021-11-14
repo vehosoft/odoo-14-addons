@@ -22,11 +22,11 @@ odoo.define("pos_facturatool_customerpanel.models", function (require) {
     var OrderSuper = models.Order.prototype;
     models.Order = models.Order.extend({
         initialize: function(attributes,options){
-            OrderSuper.initialize.apply(this, arguments);
+            var initialize_resp = OrderSuper.initialize.apply(this, arguments);
             this.cfdi_ticket_codigo = this.generate_unique_ticket_code();
-            console.log('pos_facturatool_customerpanel Order initialize');
-            console.log(this);
-            return OrderSuper.initialize.call(this, attributes,options);
+            //return OrderSuper.initialize.call(this, attributes,options);
+            //return OrderSuper.initialize.apply(this, arguments);
+            return initialize_resp;
         },
         
         export_as_JSON: function() {
@@ -78,6 +78,7 @@ odoo.define("pos_facturatool_customerpanel.models", function (require) {
             }
             return receipt;
         },
+        
         generate_unique_ticket_code: function() {
             // Generates a public identification number for the order.
             // The generated number must be unique and sequential. They are made 12 digit long

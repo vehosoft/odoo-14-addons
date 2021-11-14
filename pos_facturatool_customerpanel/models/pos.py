@@ -28,6 +28,64 @@ class PosOrder(models.Model):
     cfdi_factura_id = fields.Char(string='FacturaTool FacturaID', size=30, copy=False, readonly=True)
     cfdi_factura_global = fields.Boolean(string="Factura Global", default=False ,readonly=True)
 
+    def action_pos_order_invoice(self):
+        moves = self.env['account.move']
+        wsdl = 'http://ws.facturatool.com/index.php?wsdl'
+        client = zeep.Client(wsdl)
+
+        for order in self:
+            #Si el Pedido esta sincronizado al Portal de Cliente
+            if order.cfdi_ticket_state == 'sync':
+                ft_account = self.env['facturatool.account'].search([('rfc','!=',''),('company_id','=',order.company_id.id)], limit=1)
+                params = {
+                    'Rfc': ft_account.rfc,
+                    'Usuario': ft_account.username,
+                    'Password': ft_account.password,
+                    'TransID': order.cfdi_ticket_id
+                }
+                _logger.debug('===== action_pos_order_invoice statusTicket params = %r',params)
+                result = client.service.statusTicket(params=params)
+                _logger.debug('===== action_pos_order_invoice statusTicket result = %r',result)
+                ws_res = json.loads(result)
+                _logger.debug('===== action_pos_order_invoice statusTicket ws_res = %r',ws_res)
+                if ws_res['success'] == True:
+                    #Si el Pedido ya fue timbrado en el Portal de Cliente
+                    if ws_res['state'] == 'done':
+                        order.write({
+                            'cfdi_ticket_state': 'done',
+                            'cfdi_factura_id': ws_res['factura_id']
+                        })
+                        msg = 'El pedido '+order.name+' ya ha sido facturado desde el Poral de Clientes'
+                        raise Warning(msg)
+                        return {'msg': msg,'status': False}
+        
+        resp = super().action_pos_order_invoice()
+        _logger.debug('===== action_pos_order_invoice resp = %r',resp)
+        for order in self:
+            #Si el Pedido esta sincronizado al Portal de Cliente y se Timbra el CFDI desde Odoo
+            if order.cfdi_ticket_state == 'sync' and order.account_move and order.account_move.cfdi_state == 'done':
+                #Actualiza el status del Pedido
+                order.write({
+                    'cfdi_ticket_state': 'done',
+                    'cfdi_factura_id': order.account_move.cfdi_trans_id
+                })
+                #Actualiza el status del Ticket en el Portal de Clientes
+                ft_account = self.env['facturatool.account'].search([('rfc','!=',''),('company_id','=',order.company_id.id)], limit=1)
+                params = {
+                    'Rfc': ft_account.rfc,
+                    'Usuario': ft_account.username,
+                    'Password': ft_account.password,
+                    'TransID': order.cfdi_ticket_id,
+                    'State': 'done',
+                    'FacturaID': order.account_move.cfdi_trans_id
+                }
+                _logger.debug('===== action_pos_order_invoice actualizarTicket params = %r',params)
+                result = client.service.actualizarTicket(params=params)
+                _logger.debug('===== action_pos_order_invoice actualizarTicket result = %r',result)
+                ws_res = json.loads(result)
+                _logger.debug('===== action_pos_order_invoice actualizarTicket ws_res = %r',ws_res)
+        return resp
+
     @api.model
     def _order_fields(self, ui_order):
         vals = order_id = super()._order_fields(ui_order)
@@ -279,6 +337,7 @@ class PosOrder(models.Model):
                 pos_order.write({
                     'cfdi_ticket_state':'done',
                     'cfdi_ticket_calls': 0,
+                    'cfdi_factura_id': pos_order.account_move.cfdi_trans_id
                 })
 
         _logger.debug('===== cron_send_pos_orders_to_facturatool NEW last_order_id = %r',last_order_id)
@@ -304,7 +363,7 @@ class PosOrder(models.Model):
                 ft_accounts[pos_order.company_id.id] = ft_account
             
             #_logger.debug('===== cron_resend_pos_orders_to_facturatool ft_account = %r',ft_account)
-            #_logger.debug('===== cron_resend_pos_orders_to_facturatool pos_order.account_move = %r', pos_order.account_move.cfdi_state)
+            _logger.debug('===== cron_resend_pos_orders_to_facturatool pos_order.account_move = %r', pos_order.account_move.cfdi_state)
             
             if ft_account.rfc != False and pos_order.account_move.cfdi_state != 'done':
                 _logger.debug('===== cron_resend_pos_orders_to_facturatool pos_order.name = %r',pos_order.name)
@@ -411,4 +470,5 @@ class PosOrder(models.Model):
                 pos_order.write({
                     'cfdi_ticket_state':'done',
                     'cfdi_ticket_calls': 0,
+                    'cfdi_factura_id': pos_order.account_move.cfdi_trans_id
                 })

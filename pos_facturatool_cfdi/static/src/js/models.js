@@ -24,55 +24,6 @@ odoo.define("pos_facturatool_cfdi.models", function (require) {
 
     var PosModelSuper = models.PosModel.prototype;
     models.PosModel = models.PosModel.extend({
-        /*_save_to_server: function(orders, options) {
-            console.log('_save_to_server facturatool.....');
-            var self = this, orderData = {};
-            var promiseSaveServer = PosModelSuper._save_to_server.apply(this, arguments);
-            promiseSaveServer.then(function (server_ids) {
-                console.log('_save_to_server facturatool.....');
-                console.log('server_ids');
-                console.log(server_ids);
-                console.log('orders');
-                console.log(orders);
-                for (var index = 0; index < orders.length; index++) {
-                    orderData = orders[index].data;
-                    console.log(orderData.export_for_printing());
-                    console.log(orderData);
-                    if(orderData.to_invoice){
-                        console.log(server_ids[index]);
-                        
-                    }
-                }
-            })
-            return promiseSaveServer;
-        },
-        push_and_invoice_order: function (order) {
-            var self = this;
-            console.log('push_and_invoice_order facturatool.....');
-            var invoiced = PosModelSuper.push_and_invoice_order.apply(this, arguments);
-            invoiced.then(function (order_server_id) {
-                console.log('push_and_invoice_order facturatool.....');
-                console.log('order_server_id');
-                console.log(order_server_id);
-                self.rpc({
-                    model: 'pos.order',
-                    method: 'get_invoice_data',
-                    args: [order_server_id],
-                    kwargs: {context: self.session.user_context},
-                }, {
-                    timeout: 30000,
-                })
-                .then(function (order_invoice_data) {
-                    console.log('order_server_id');
-                    console.log(order_invoice_data);
-                }).catch(function (reason){
-                    var error = reason.message;
-                    throw error;
-                })
-            })
-            return invoiced;
-        },
-        */
         push_and_invoice_order: function (order) {
             var self = this;
             var invoiced = new Promise(function (resolveInvoiced, rejectInvoiced) {
@@ -172,21 +123,20 @@ odoo.define("pos_facturatool_cfdi.models", function (require) {
 
     var OrderSuper = models.Order.prototype;
     models.Order = models.Order.extend({
+        
         initialize: function(attributes,options){
-            OrderSuper.initialize.apply(this, arguments);
-            ///var self = this;
-            //options  = options || {};
+            var initialize_resp = OrderSuper.initialize.apply(this, arguments);
             this.order_name = '';
             this.uso_cfdi = '';
             this.account_move = false;
-            return OrderSuper.initialize.call(this, attributes,options);
-            //this.uso_cfdi = '';
-            //return this;
+            //return OrderSuper.initialize.call(this, attributes,options);
+            return initialize_resp;
         },
         set_uso_cfdi: function(value) {
             this.uso_cfdi = value;
         },
         get_uso_cfdi: function() {
+            console.log(this);
             return this.uso_cfdi;
         },
         have_uso_cfdi: function(){
