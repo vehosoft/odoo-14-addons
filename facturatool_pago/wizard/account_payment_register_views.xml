@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="view_account_payment_register_hour_form">
+            <field name="name">account.payment.register.hour.form</field>
+            <field name="model">account.payment.register</field>
+            <field name="inherit_id" ref="account.view_account_payment_register_form" />
+            <field name="priority" eval="14"/>
+            <field name="arch" type="xml">
+                <xpath expr='//group/group[@name="group2"]/field[@name="payment_date"]' position="after">
+                    <field name="hora_pago" widget="float_time"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

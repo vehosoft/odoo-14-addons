@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+      <record model="ir.ui.view" id="view_move_pagos_cfdi_form">
+            <field name="name">account.move.pagos_cfdi.form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form" />
+            <field name="priority" eval="14"/>
+            <field name="arch" type="xml">
+                <xpath expr='//notebook/page[@id="invoice_tab"]/group[@class="oe_subtotal_footer oe_right"]/field[@name="amount_residual"]' position="after">
+                    <field name="cfdi_residual" class="oe_subtotal_footer_separator" attrs="{'invisible': [('cfdi_state', '!=', 'done')]}"/>
+                    <field name="cfdi_parcialidad" readonly="1" attrs="{'invisible': [('cfdi_state', '!=', 'done')]}"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

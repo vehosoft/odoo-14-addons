@@ -306,7 +306,7 @@ class AccountMove(models.Model):
         for invoice in self:
             ft_account = self.env['facturatool.account'].search([('rfc','!=',''),('company_id','=',invoice.company_id.id)], limit=1)
             if ft_account.rfc == False:
-                msg = 'Error #8001: Necesita configurar su cuenta FacturaTool en "Contabilidad/Configuracion/Facturacion Electronica/Cuenta FacturaTool" para la empresa: '+invoices[0].company_id.name
+                msg = 'Error #8001: Necesita configurar su cuenta FacturaTool en "Contabilidad/Configuracion/Facturacion Electronica/Cuenta FacturaTool" para la empresa: '+invoice.company_id.name
                 raise UserError(msg)
             #Solicitud al WS
             params = {

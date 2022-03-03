@@ -10,7 +10,7 @@
 	'website': 'http://www.vehosoft.com',
 	'license': 'AGPL-3',
 	'depends': [
-		'facturatool_account',
+		'sale','facturatool_account',
 	],
 	'data': [
 		'security/ir.model.access.csv',

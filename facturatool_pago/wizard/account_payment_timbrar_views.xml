@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_account_payment_wizard__timbrar_cfdi_form" model="ir.ui.view">
+            <field name="name">account.payment.cfdi.timbrar.form</field>
+            <field name="model">account.payment.cfdi.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Generar CFDI Complemento de Pago">
+                    <p class="oe_grey">
+                        Se genera un CFDI con Complemento de Pago version 3.3 valido ante el SAT. Por favor revise detenidamente los datos antes de emitir el CFDI.
+                    </p>
+                    <group>
+                        <field name="cfdi_fecha"/>
+                        <field name="cfdi_hora" widget="float_time"/>
+                        <field name="cfdi_serie"/>
+                        <field name="cfdi_forma_pago"/>
+                        <field name="company_id" invisible="1"/>
+                    </group>
+                    <footer>
+                        <button name="action_timbrar_cfdi" id="action_timbrar_cfdi" string="Emitir CFDI" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_view_account_payment_wizard_cfdi" model="ir.actions.act_window">
+            <field name="name">Generar CFDI con Complemento de Pago</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">account.payment.cfdi.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <!-- TODO: check if we need this -->
+            <field name="binding_model_id" ref="account.model_account_payment" />
+            <field name="binding_view_types">list</field>
+        </record>
+
+</odoo>

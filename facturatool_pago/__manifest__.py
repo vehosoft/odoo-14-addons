@@ -10,10 +10,14 @@
 	'website': 'http://www.vehosoft.com',
 	'license': 'AGPL-3',
 	'depends': [
-		'facturatool_cfdi',
+		'account','facturatool_cfdi',
 	],
 	'data': [
-		
+		'security/ir.model.access.csv',
+		'wizard/account_payment_register_views.xml',
+		'wizard/account_payment_timbrar_views.xml',
+		'views/account_payment_views.xml',
+		'views/account_move_views.xml',
 	],
 	'qweb': [
 

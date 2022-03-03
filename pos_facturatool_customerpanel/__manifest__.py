@@ -10,7 +10,8 @@
 	'website': 'http://www.vehosoft.com',
 	'license': 'AGPL-3',
 	'depends': [
-		'facturatool_cfdi','point_of_sale'
+		#'pos_facturatool_cfdi'
+		'facturatool_cfdi','point_of_sale','pos_facturatool_cfdi'
 	],
 	'data': [
 		'data/ir_cron_data.xml',
