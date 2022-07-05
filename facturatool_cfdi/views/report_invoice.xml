@@ -14,6 +14,9 @@
 									<div t-if="o.partner_id.company_type=='company'" t-field="o.partner_id.razon_social"/>
 									<div t-if="o.partner_id.vat">RFC: <span t-field="o.partner_id.vat"/></div>
 									<div style="font-size: 11px;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+										<span t-field="o.partner_id.street"/>, <span t-field="o.partner_id.city"/>, <span t-field="o.partner_id.state_id.name"/> , <span t-field="o.partner_id.country_id.name"/>, C.P. <span t-field="o.partner_id.zip"/>
+									</div>
+									<div style="font-size: 11px;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
 											USO CFDI: <span t-field="o.cfdi_uso.code"/> - <span t-field="o.cfdi_uso.name"/>
 									</div>
 									<div style="font-weight: bold; background-color: #cecece;" t-if="o.move_type == 'out_invoice' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">Folio Fiscal</div>
