@@ -101,7 +101,7 @@ class AccountPayment(models.Model):
                             'NumParcialidad': line.cfdi_parcialidad + 1,
                             'ImpSaldoAnt': line.cfdi_residual,
                             'ImpPagado': invoice_payment['amount'],#Provisional corregir
-                            'ImpSaldoInsoluto': line.cfdi_residual - invoice_payment['amount'],#Provisional corregir
+                            'ImpSaldoInsoluto': round(line.cfdi_residual - invoice_payment['amount'],2),#Provisional corregir
                         }
                         facturas[iline:iline]=[factura]
                         iline = iline + 1
