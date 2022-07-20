@@ -55,6 +55,10 @@ odoo.define("pos_facturatool_customerpanel.models", function (require) {
                         //date_deadline.setDate(date_deadline.getDate() - 1);
                         receipt.cfdi_ticket_deadline = date_deadline.getFullYear()+'-'+(date_deadline.getMonth()+1)+'-'+date_deadline.getDate();
                         break;
+                    case '3days':
+                        date_deadline.setDate(date_deadline.getDate() + 3);
+                        receipt.cfdi_ticket_deadline = date_deadline.getFullYear()+'-'+(date_deadline.getMonth()+1)+'-'+date_deadline.getDate();
+                        break;
                     case '7days':
                         date_deadline.setDate(date_deadline.getDate() + 7);
                         receipt.cfdi_ticket_deadline = date_deadline.getFullYear()+'-'+(date_deadline.getMonth()+1)+'-'+date_deadline.getDate();
@@ -69,6 +73,10 @@ odoo.define("pos_facturatool_customerpanel.models", function (require) {
                         break;
                     case '3months':
                         date_deadline.setMonth(date_deadline.getMonth() + 3);
+                        receipt.cfdi_ticket_deadline = date_deadline.getFullYear()+'-'+(date_deadline.getMonth()+1)+'-'+date_deadline.getDate();
+                        break;
+                    default: //inMonth
+                        date_deadline = new Date(date_deadline.getFullYear(), date_deadline.getMonth()+1, 0);
                         receipt.cfdi_ticket_deadline = date_deadline.getFullYear()+'-'+(date_deadline.getMonth()+1)+'-'+date_deadline.getDate();
                         break;
                 }
