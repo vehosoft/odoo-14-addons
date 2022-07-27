@@ -23,7 +23,9 @@ class AccountMoveCfdiWizard(models.TransientModel):
     @api.model
     def _default_cfdi_metodo_pago(self):
         invoice = self.env['account.move'].browse(self._context.get('active_id'))
-        if invoice.payment_state == 'paid':
+        if invoice.cfdi_metodo_pago:
+            return invoice.cfdi_metodo_pago
+        elif invoice.payment_state == 'paid':
             return 'PUE'
         else:
             return 'PPD'
@@ -32,7 +34,9 @@ class AccountMoveCfdiWizard(models.TransientModel):
     def _default_cfdi_forma_pago(self):
         invoice = self.env['account.move'].browse(self._context.get('active_id'))
         _logger.debug('===== _default_cfdi_forma_pago default_company_id = %r',self._context.get('default_company_id'))
-        if invoice.payment_state == 'paid':
+        if invoice.cfdi_forma_pago:
+            return invoice.cfdi_forma_pago
+        elif invoice.payment_state == 'paid':
             forma_pago_code = '01'
             payments = invoice._get_reconciled_info_JSON_values()
             if len(payments) > 0:

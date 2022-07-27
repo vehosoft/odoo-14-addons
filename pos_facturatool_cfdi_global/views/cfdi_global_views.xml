@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_cfdi_global_wizard" model="ir.actions.act_window">
+        <field name="name">Generar Factura Global</field>
+        <field name="res_model">cfdi.global.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_cfdi_global" name="Generar Factura Global" action="action_cfdi_global_wizard" parent="account.menu_finance_receivables" sequence="50"/>
+
+</odoo>

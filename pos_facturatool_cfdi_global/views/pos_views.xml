@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+		<data>
+				<record model="ir.ui.view" id="view_pos_order_cfdi_global_filter">
+						<field name="name">pos.order.list.cfdi_global.select</field>
+						<field name="model">pos.order</field>
+						<field name="inherit_id" ref="point_of_sale.view_pos_order_filter" />
+						<field name="arch" type="xml">
+							<field name="session_id" position="after">
+								<field name="cfdi_global_id"/>
+							</field>
+						</field>
+				</record>
+		</data>
+</odoo>
