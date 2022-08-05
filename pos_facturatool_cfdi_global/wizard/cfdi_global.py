@@ -3,6 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+import datetime
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -56,13 +57,24 @@ class CFDIGlobal(models.TransientModel):
     def create_invoice(self):
         invoice_lines_obj={}
         invoice_lines=[]
+        #Temporal
+        remplazarIVA = False
+        limit_date = datetime.datetime(2022, 7, 7, 5, 1, 0, 0)
+        _logger.debug('===== create_invoice self.end_date = %r',self.end_date)
+        _logger.debug('===== create_invoice limit_date = %r',limit_date)
+        if self.end_date < limit_date:
+            remplazarIVA = True
+        #######
         for order in self.pos_order_ids:
             for line in order.lines:
                 index_line = str(line.product_id.id)+':'+str(line.price_unit)
                 tax_ids = []
                 for tax in line.tax_ids:
                     index_line += ':'+str(tax.id)
-                    tax_ids.append(tax.id)
+                    if remplazarIVA==True and tax.id==2:#Temporal
+                        tax_ids.append(13)#Temporal
+                    else:#Temporal
+                        tax_ids.append(tax.id)
 
                 if index_line in invoice_lines_obj:
                     invoice_lines_obj[index_line]['quantity'] += line.qty
