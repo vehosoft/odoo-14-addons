@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_account_move_wizard__timbrar_cfdi_egreso_form" model="ir.ui.view">
+            <field name="name">account.move.cfdi.egreso.timbrar.form</field>
+            <field name="model">account.move.cfdi.egreso.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Generar CFDI de Egreso">
+                    <p class="oe_grey">
+                        Se genera un CFDI de Egreso version 3.3 valido ante el SAT. Por favor revise detenidamente los datos antes de emitir el CFDI.
+                    </p>
+                    <group>
+                        <field name="cfdi_uso"/>
+                        <field name="cfdi_fecha"/>
+                        <field name="cfdi_hora" widget="float_time"/>
+                        <field name="cfdi_serie"/>
+                        <field name="cfdi_tipo"/>
+                        <field name="cfdi_forma_pago"/>
+                        <field name="cfdi_descripcion"/>
+                        <field name="company_id" invisible="1"/>
+                    </group>
+                    <footer>
+                        <button name="action_timbrar_cfdi" id="action_timbrar_cfdi" string="Emitir CFDI" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_view_account_move_wizard_cfdi_egreso" model="ir.actions.act_window">
+            <field name="name">Generar CFDI de Egreso</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">account.move.cfdi.egreso.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <!-- TODO: check if we need this -->
+            <field name="binding_model_id" ref="account.model_account_move" />
+            <field name="binding_view_types">list</field>
+        </record>
+
+</odoo>
