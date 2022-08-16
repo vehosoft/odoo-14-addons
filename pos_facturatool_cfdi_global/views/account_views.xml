@@ -18,7 +18,7 @@
 					<field name="res_model">pos.order</field>
 					<field name="view_mode">tree,form</field>
 					<field name="context">{'search_default_cfdi_global_id': active_id, 'default_cfdi_global_id': active_id}</field>
-					<field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
+					<field name="groups_id" eval="[(4, ref('account.group_account_invoice'))]"/>
 				</record>
 
 				<record model="ir.ui.view" id="view_account_invoice_cfdi_global_form">
@@ -32,7 +32,7 @@
 							<div name="button_box" position="inside">
 								
 								<button class="oe_stat_button" name="%(pos_facturatool_cfdi_global.act_account_move_2_pos_orders)d" type="action"
-									groups="account.group_account_user"
+									groups="account.group_account_invoice"
 									icon="fa-list" attrs="{'invisible': [('cfdi_global', '=', False)]}">
 									<field string="#Pedidos del CFDI Global" name="cfdi_pos_order_count" widget="statinfo"/>
 								</button>
