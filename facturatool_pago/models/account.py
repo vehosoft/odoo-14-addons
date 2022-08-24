@@ -22,6 +22,7 @@ class AccountPayment(models.Model):
 
     cfdi_hora_pago = fields.Float('Hora de pago', default=0.00)
     cfdi_hora_pago_str = fields.Char('Hora de Pago Texto',compute='_cfdi_hora_pago_str')
+    cfdi_doctos_rel = fields.Text('Documentos Relacionados', copy=False)
     
     def _cfdi_hora_pago_str(self):
         for record in self:
@@ -93,15 +94,17 @@ class AccountPayment(models.Model):
                 _logger.debug('===== action_timbrar_pago_cfdi invoice_payments = %r',invoice_payments)
                 for invoice_payment in invoice_payments:
                     if invoice_payment['account_payment_id'] == payment.id:
+                        impSaldoAnt = round(line.cfdi_residual,3)
                         factura = {
                             'IdDocumento': line.cfdi_uuid,
                             'Serie': line.cfdi_serie.name,
                             'Folio': line.cfdi_folio,
                             'MonedaDR': 'MXN',#line.currency_id.name, hasta que se implemente timbrado para monedas distintas a MXN
                             'NumParcialidad': line.cfdi_parcialidad + 1,
-                            'ImpSaldoAnt': line.cfdi_residual,
+                            'ImpSaldoAnt': impSaldoAnt,#line.cfdi_residual,
                             'ImpPagado': invoice_payment['amount'],#Provisional corregir
-                            'ImpSaldoInsoluto': round(line.cfdi_residual - invoice_payment['amount'],2),#Provisional corregir
+                            'ImpSaldoInsoluto': round(impSaldoAnt - invoice_payment['amount'],2),#Provisional corregir
+                            #'ImpSaldoInsoluto': round(line.cfdi_residual - invoice_payment['amount'],2),#Provisional corregir
                         }
                         facturas[iline:iline]=[factura]
                         iline = iline + 1
@@ -160,6 +163,7 @@ class AccountPayment(models.Model):
     				'cfdi_sello_digital':sello_digital,
     				'cfdi_serie_csd':serie_csd,
     				'cfdi_cadena_original':str(cadena_orginal),
+                    'cfdi_doctos_rel': json.dumps(facturas)
     			})
 
                 filename=ft_account.rfc+'_'
@@ -186,6 +190,13 @@ class AccountPayment(models.Model):
                 raise UserError(msg)
 
         return {'params': params,'status': status}
+
+    def _get_cfdi_complemento_pagos(self):
+        for payment in self:
+            doctos = json.loads(payment['cfdi_doctos_rel'])
+            _logger.debug('===== _get_cfdi_complemento_pagos doctos = %r',doctos)
+            return doctos
+            
 
     def action_cancel_pago_cfdi(self):
         wsdl = 'http://ws.facturatool.com/index.php?wsdl'

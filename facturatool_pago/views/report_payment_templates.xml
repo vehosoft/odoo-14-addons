@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_payment_receipt_document"  inherit_id="account.report_payment_receipt_document">
+        <xpath expr="//t[@t-call='web.external_layout']" position="replace">
+            <t t-call="facturatool_account.cfdi_layout">
+                <t t-set="o" t-value="o.with_context(lang=lang)" />
+                <div class="page" t-if="o.payment_type == 'inbound' and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+					<div class="row mt32 mb32">
+                        <div class="col-5">
+
+                            <div style="font-weight: bold;background-color: #cecece;">Receptor / Cliente</div>
+                            <div t-if="o.partner_id.company_type=='person' " t-field="o.partner_id.name"/>
+                            <div t-if="o.partner_id.company_type=='company'" t-field="o.partner_id.razon_social"/>
+                            <div t-if="o.partner_id.vat">RFC: <span t-field="o.partner_id.vat"/></div>
+                            <div style="font-size: 11px;">
+                                <span t-field="o.partner_id.street"/>, <span t-field="o.partner_id.city"/>, <span t-field="o.partner_id.state_id.name"/> , <span t-field="o.partner_id.country_id.name"/>, C.P. <span t-field="o.partner_id.zip"/>
+                            </div>
+                            <div style="font-size: 11px;">
+                                    USO CFDI: <span t-field="o.cfdi_uso.code"/> - <span t-field="o.cfdi_uso.name"/>
+                            </div>
+                            <div style="font-weight: bold; background-color: #cecece;">Folio Fiscal</div>
+                            <div>
+                                    <span t-field="o.cfdi_uuid"/>
+                            </div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div style="font-weight: bold; background-color: #cecece;" >F. Certificacion</div>
+                            <div >
+                                <span t-field="o.cfdi_fecha_timbrado"/>
+                            </div>
+                            <div style="font-weight: bold; background-color: #cecece;" >No. Certificado Digital</div>
+                            <div >
+                                    <span t-field="o.cfdi_serie_csd"/>
+                            </div>
+                            <div style="font-weight: bold; background-color: #cecece;" >No. Certificado SAT</div>
+                            <div >
+                                    <span t-field="o.cfdi_serie_sat"/>
+                            </div>
+
+                        </div>
+                        <div class="col-3 text-center">
+                            <div style="font-weight: bold; background-color: #cecece;">Recepcion de Pagos</div>
+                            <div>
+                                    <span t-field="o.cfdi_serie"/> <span t-field="o.cfdi_folio"/>
+                            </div>
+                            <div style="font-weight: bold; background-color: #cecece;">TipoDeComprobante</div>
+                            <div>
+                                    Pagos
+                            </div>
+                            <div style="font-weight: bold; background-color: #cecece;">F. Emision</div>
+                            <div >
+                                    <span t-field="o.invoice_date"/> <span t-field="o.cfdi_hora_str"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="font-weight: bold;background-color: #cecece;">DATOS GENERALES DEL PAGO</div>
+                    <table class="table table-sm o_main_table" name="invoice_line_table">
+                        <thead>
+                                <tr>
+                                    <th><span>Fecha Pago</span></th>
+                                    <th><span>Forma Pago</span></th>
+                                    <th><span>Moneda - T. Cambio</span></th>
+                                    <th><span>Importe del Pago</span></th>
+                                    <th><span>Num. Operacion</span></th>
+                                    <th><span>Cta. Ordenante</span></th>
+                                </tr>
+                        </thead>
+                        <tbody class="invoice_tbody">
+                            <tr>
+                                <td> <span t-field="o.date"/> </td>
+                                <td> <span t-field="o.cfdi_forma_pago.code"/> <span t-field="o.cfdi_forma_pago.name"/> </td>
+                                <td> MXN - 1 </td>
+                                <td class="text-right"> <span t-field="o.amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/> </td>
+                                <td></td>
+                                <td></td>
+                                
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div style="font-weight: bold;background-color: #cecece;">DATOS DE CFDIS RELACIONADOS</div>
+                    <table class="table table-sm o_main_table" name="invoice_line_table">
+                        <thead>
+                                <tr>
+                                    <th><span>Folio Fiscal</span></th>
+                                    <th><span>Serie/Folio</span></th>
+                                    <th><span>Moneda</span></th>
+                                    <th><span>Parcialidad</span></th>
+                                    <th><span>Saldo Anterior</span></th>
+                                    <th><span>Importe Pagado</span></th>
+                                    <th><span>Importe Insoluto</span></th>
+                                </tr>
+                        </thead>
+                        <tbody class="invoice_tbody">
+                            <tr t-foreach="o._get_cfdi_complemento_pagos()" t-as="rec">
+                                    <td><span t-esc="rec['IdDocumento']"/></td>
+                                    <td><span t-esc="rec['Serie']"/> <span t-esc="rec['Folio']"/></td>
+                                    <td><span t-esc="rec['MonedaDR']"/></td>
+                                    <td><span t-esc="rec['NumParcialidad']"/></td>
+                                    <td><span t-esc="rec['ImpSaldoAnt']"/></td>
+                                    <td><span t-esc="rec['ImpPagado']"/></td>
+                                    <td><span t-esc="rec['ImpSaldoInsoluto']"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div style="font-weight: bold;background-color: #cecece;">CONCEPTOS</div>
+                    <table class="table table-sm o_main_table" name="invoice_line_table">
+                        <thead>
+                                <tr>
+                                    <th><span>ClaveProdServ</span></th>
+                                    <th><span>Cant.</span></th>
+                                    <th><span>Clave Unidad</span></th>
+                                    <th><span>Descripcion</span></th>
+                                    <th><span>Valor Unitario</span></th>
+                                    <th><span>Importe</span></th>
+                                </tr>
+                        </thead>
+                        <tbody class="invoice_tbody">
+                            <tr>
+                                <td>84111506</td>
+                                <td>1</td>
+                                <td>ACT</td>
+                                <td>Pago</td>
+                                <td class="text-right">$ 0.00</td>
+                                <td class="text-right">$ 0.00</td>
+                                
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div style="font-weight: bold; background-color: #cecece;" >Cadena original del complemento del certificacion digital del SAT</div>
+                            <div >
+                                    <span style="font-size: 10px;" t-field="o.cfdi_cadena_original"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" >
+                        <div class="col-2">
+                                <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('QR', 'https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx&amp;id='+o.cfdi_uuid+'&amp;re='+o.company_id.vat+'&amp;rr='+o.partner_id.vat, 120, 120)" style="margin-top:20px;"/>
+                        </div>
+                        <div class="col-10">
+                            <div style="font-weight: bold; background-color: #cecece;" >Sello digital del CFDI</div>
+                            <div >
+                                    <span style="font-size: 10px;" t-field="o.cfdi_sello_digital"/>
+                            </div>
+                            <div style="font-weight: bold; background-color: #cecece;" >Sello digital del SAT</div>
+                            <div >
+                                    <span style="font-size: 10px;" t-field="o.cfdi_sello_sat"/>
+                            </div>
+                            <div class="text-right">
+                                    <br/>
+                                    <b>ESTE DOCUMENTO ES UNA REPRESENTACION IMPRESA DE UN CFDI.</b>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="page" t-if="o.cfdi_state == 'draft'">
+                    <h3><strong>Payment Receipt: <span t-field="o.name"/></strong></h3>
+                    <div class="row mt64">
+                        <div class="col-6" t-if="o.date">
+                            <strong>Payment Date: </strong> <span t-field="o.date"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6" t-if="o.partner_type">
+                            <t t-if="o.partner_type == 'customer'">
+                                <strong>Customer: </strong>
+                            </t>
+                            <t t-if="o.partner_type == 'supplier'">
+                                <strong>Vendor: </strong>
+                            </t><span t-field="o.partner_id"/>
+                        </div>
+                        <div class="col-6" t-if="o.payment_method_id">
+                            <strong>Payment Method: </strong><span t-field="o.payment_method_id.name"/>
+                        </div>
+                    </div>
+                    <div class="row mb64">
+                        <div class="col-6" t-if="o.amount">
+                            <strong>Payment Amount: </strong><span t-field="o.amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                        </div>
+                        <div class="col-6" t-if="o.ref">
+                            <strong>Memo: </strong><span t-field="o.ref"/>
+                        </div>
+                    </div>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th><span>Invoice Date</span></th>
+                                <th><span>Invoice Number</span></th>
+                                <th><span>Reference</span></th>
+                                <th class="text-right"><span>Original Amount</span></th>
+                                <th class="text-right"><span>Amount Paid</span></th>
+                                <th class="text-right"><span>Balance</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="o.move_id._get_reconciled_invoices_partials()" t-as="rec">
+                                <t t-set="amount" t-value="rec[1]"/>
+                                <t t-set="inv" t-value="rec[2].move_id"/>
+                                <t t-if="inv.move_type != 'entry'">
+                                    <td><span t-field="inv.invoice_date"/></td>
+                                    <td><span t-field="inv.name"/></td>
+                                    <td><span t-field="inv.ref"/></td>
+                                    <td class="text-right"><span t-field="inv.amount_total"/></td>
+                                    <td class="text-right"><span t-esc="amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                    <td class="text-right"><span t-field="inv.amount_residual"/></td>
+                                </t>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>
