@@ -29,7 +29,7 @@ class CFDIGlobal(models.TransientModel):
             self.start_date = self.end_date
 
     def load_orders(self):
-        order_filters = [('date_order','>=',self.start_date),('date_order','<=',self.end_date),('cfdi_global','=',False),('cfdi_ticket_state','!=','done'),('state','in',['paid','done'])]
+        order_filters = [('date_order','>=',self.start_date),('date_order','<=',self.end_date),('cfdi_global','=',False),('cfdi_ticket_state','!=','done'),('state','in',['paid','done']),('amount_total','>',0.00)]
         orders = self.env['pos.order'].search(order_filters)
         method_ids = []
         for method in self.payment_method_ids:
@@ -37,6 +37,8 @@ class CFDIGlobal(models.TransientModel):
         order_ids = []
         for order in orders:
             _logger.debug('===== load_orders order.name = %r',order.name)
+            if len(order.refund_order_ids) > 0:
+                continue
             for payment in order.payment_ids:
                 if payment.payment_method_id.id in method_ids:
                     order_ids.append(order.id)
