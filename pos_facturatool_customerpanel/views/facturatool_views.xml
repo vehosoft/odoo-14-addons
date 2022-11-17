@@ -29,5 +29,18 @@
                 </field>
             </field>
         </record>
+
+        <record id="view_pos_order_cfdi_customerpanel_form" model="ir.ui.view">
+            <field name="name">pos.order.cfdi.customerpanel.form</field>
+            <field name="model">pos.order</field>
+            <field name="inherit_id" ref="pos_facturatool_cfdi.view_pos_order_cfdi_form" />
+            <field name="priority" eval="14"/>
+            <field name="arch" type="xml">
+                <button name="action_pos_order_invoice" position="attributes">
+                    <attribute name="attrs">{'invisible': ['|', '|', '|','|', '|',('invoice_group', '=', False), ('state','=','draft'), ('state','=','cancel'), ('state','=','invoiced'), ('amount_total','&lt;=',0),('cfdi_ticket_state','=','done')]}</attribute>
+                </button>
+            </field>
+        </record>
+
     </data>
 </odoo>

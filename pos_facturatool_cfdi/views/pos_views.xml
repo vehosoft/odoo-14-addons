@@ -22,7 +22,7 @@
             <field name="priority" eval="14"/>
             <field name="arch" type="xml">
                 <button name="action_pos_order_invoice" position="replace">
-                    <button name="action_pos_order_invoice" string="Invoice" type="object" confirm="Estas seguro de generar la factura CFDI de este pedido?" attrs="{'invisible': ['|', '|', '|', ('invoice_group', '=', False), ('state','=','draft'), ('state','=','cancel'), ('state','=','invoiced')]}"/>
+                    <button name="action_pos_order_invoice" string="Invoice" type="object" confirm="Estas seguro de generar la factura CFDI de este pedido?" attrs="{'invisible': ['|', '|', '|', '|', ('invoice_group', '=', False), ('state','=','draft'), ('state','=','cancel'), ('state','=','invoiced'), ('amount_total','&lt;=',0)]}"/>
                 </button>
             </field>
         </record>
