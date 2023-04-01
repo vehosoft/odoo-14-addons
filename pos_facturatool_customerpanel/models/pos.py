@@ -30,12 +30,11 @@ class PosOrder(models.Model):
 
     #def action_pos_order_invoice(self):
     #    moves = self.env['account.move']
-    #    wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-    #    client = zeep.Client(wsdl)
     #    for order in self:
     #        #Si el Pedido esta sincronizado al Portal de Cliente
     #        if order.cfdi_ticket_state == 'sync':
     #            ft_account = self.env['facturatool.account'].search([('rfc','!=',''),('company_id','=',order.company_id.id)], limit=1)
+    #            client = zeep.Client(ft_account.wsdl)
     #            params = {
     #                'Rfc': ft_account.rfc,
     #                'Usuario': ft_account.username,
@@ -96,11 +95,12 @@ class PosOrder(models.Model):
         return vals
 
     def action_send_order_to_facturatool(self):
-        wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-        client = zeep.Client(wsdl)
+        client = False
         for pos_order in self:
             ft_account = self.env['facturatool.account'].search([('rfc','!=',''),('company_id','=',pos_order.company_id.id)], limit=1)
             if ft_account.rfc != False:
+                if client == False:
+                    client = zeep.Client(ft_account.wsdl)
                 _logger.debug('===== action_send_order_to_facturatool pos_order.name = %r',pos_order.name)
                 
                 conceptos = []
@@ -181,31 +181,34 @@ class PosOrder(models.Model):
                 if len(taxes) > 0:
                     params['Impuestos'] =  taxes
                 
-                _logger.debug('===== action_send_order_to_facturatool crearTicket params = %r',params)
-                result = client.service.crearTicket(params=params)
-                _logger.debug('===== action_send_order_to_facturatool crearTicket result = %r',result)
-                ws_res = json.loads(result)
-                _logger.debug('===== action_send_order_to_facturatool crearTicket ws_res = %r',ws_res)
+                try:
+                    _logger.debug('===== action_send_order_to_facturatool crearTicket params = %r',params)
+                    result = client.service.crearTicket(params=params)
+                    _logger.debug('===== action_send_order_to_facturatool crearTicket result = %r',result)
+                    ws_res = json.loads(result)
+                    _logger.debug('===== action_send_order_to_facturatool crearTicket ws_res = %r',ws_res)
 
-                if ws_res['success'] == True:
-                    pos_order.write({
-                        'cfdi_ticket_state':'sync',
-                        'cfdi_ticket_id':ws_res['trans_id'],
-                        'cfdi_ticket_calls': 0 #pos_order.cfdi_ticket_calls + 1,
-                    })
-                else:
-                    if ws_res['error'] is None:
-                        error = "Servicio temporalmente fuera de servicio"
+                    if ws_res['success'] == True:
+                        pos_order.write({
+                            'cfdi_ticket_state':'sync',
+                            'cfdi_ticket_id':ws_res['trans_id'],
+                            'cfdi_ticket_calls': 0 #pos_order.cfdi_ticket_calls + 1,
+                        })
                     else:
-                        error = 'Error #' + str(ws_res['errno']) + ': ' + ws_res['error']
-                    pos_order.write({
-                        'cfdi_ticket_calls': pos_order.cfdi_ticket_calls + 1,
-                        'cfdi_ticket_call_error': error
-                    })
+                        if ws_res['error'] is None:
+                            error = "Servicio temporalmente fuera de servicio"
+                        else:
+                            error = 'Error #' + str(ws_res['errno']) + ': ' + ws_res['error']
+                        pos_order.write({
+                            'cfdi_ticket_calls': pos_order.cfdi_ticket_calls + 1,
+                            'cfdi_ticket_call_error': error
+                        })
+                except:
+                    _logger.debug('===== action_send_order_to_facturatool except****')
+                    pass
 
     def cron_send_pos_orders_to_facturatool(self):
-        wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-        client = zeep.Client(wsdl)
+        client = False
         ft_accounts = {}
 
         cron_obj = self.env['ir.cron'].search([('name','=','Send POS Orders to FacturaTool Customer Panel')])[0]
@@ -229,6 +232,8 @@ class PosOrder(models.Model):
             
             if ft_account.rfc != False and pos_order.account_move.cfdi_state != 'done':
                 _logger.debug('===== cron_send_pos_orders_to_facturatool pos_order.name = %r',pos_order.name)
+                if client == False:
+                    client = zeep.Client(ft_account.wsdl)
                 
                 conceptos = []
                 taxes = []
@@ -306,27 +311,31 @@ class PosOrder(models.Model):
                 if len(taxes) > 0:
                     params['Impuestos'] =  taxes
                 
-                _logger.debug('===== cron_send_pos_orders_to_facturatool crearTicket params = %r',params)
-                result = client.service.crearTicket(params=params)
-                _logger.debug('===== cron_send_pos_orders_to_facturatool crearTicket result = %r',result)
-                ws_res = json.loads(result)
-                _logger.debug('===== cron_send_pos_orders_to_facturatool crearTicket ws_res = %r',ws_res)
+                try:
+                    _logger.debug('===== cron_send_pos_orders_to_facturatool crearTicket params = %r',params)
+                    result = client.service.crearTicket(params=params)
+                    _logger.debug('===== cron_send_pos_orders_to_facturatool crearTicket result = %r',result)
+                    ws_res = json.loads(result)
+                    _logger.debug('===== cron_send_pos_orders_to_facturatool crearTicket ws_res = %r',ws_res)
 
-                if ws_res['success'] == True:
-                    pos_order.write({
-                        'cfdi_ticket_state':'sync',
-                        'cfdi_ticket_id':ws_res['trans_id'],
-                        'cfdi_ticket_calls':0 #pos_order.cfdi_ticket_calls + 1,
-                    })
-                else:
-                    if ws_res['error'] is None:
-                        error = "Servicio temporalmente fuera de servicio"
+                    if ws_res['success'] == True:
+                        pos_order.write({
+                            'cfdi_ticket_state':'sync',
+                            'cfdi_ticket_id':ws_res['trans_id'],
+                            'cfdi_ticket_calls':0 #pos_order.cfdi_ticket_calls + 1,
+                        })
                     else:
-                        error = 'Error #' + str(ws_res['errno']) + ': ' + ws_res['error']
-                    pos_order.write({
-                        'cfdi_ticket_calls': pos_order.cfdi_ticket_calls + 1,
-                        'cfdi_ticket_call_error': error
-                    })
+                        if ws_res['error'] is None:
+                            error = "Servicio temporalmente fuera de servicio"
+                        else:
+                            error = 'Error #' + str(ws_res['errno']) + ': ' + ws_res['error']
+                        pos_order.write({
+                            'cfdi_ticket_calls': pos_order.cfdi_ticket_calls + 1,
+                            'cfdi_ticket_call_error': error
+                        })
+                except:
+                    _logger.debug('===== cron_send_pos_orders_to_facturatool except****')
+                    pass
                 
                 #Incremente last_order_id aunque la sincronizacion falle
                 if pos_order.id > last_order_id:
@@ -347,8 +356,7 @@ class PosOrder(models.Model):
             })
         
     def cron_resend_pos_orders_to_facturatool(self):
-        wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-        client = zeep.Client(wsdl)
+        client = False
         ft_accounts = {}
 
         pos_orders = self.env['pos.order'].search([('cfdi_ticket_codigo','!=',''),('cfdi_ticket_state','=','pending'),('cfdi_ticket_calls','<=',5)], limit=30, order='id desc')
@@ -366,6 +374,8 @@ class PosOrder(models.Model):
             
             if ft_account.rfc != False and pos_order.account_move.cfdi_state != 'done':
                 _logger.debug('===== cron_resend_pos_orders_to_facturatool pos_order.name = %r',pos_order.name)
+                if client == False:
+                    client = zeep.Client(ft_account.wsdl)
                 
                 conceptos = []
                 taxes = []
@@ -443,27 +453,31 @@ class PosOrder(models.Model):
                 if len(taxes) > 0:
                     params['Impuestos'] =  taxes
                 
-                _logger.debug('===== cron_resend_pos_orders_to_facturatool crearTicket params = %r',params)
-                result = client.service.crearTicket(params=params)
-                _logger.debug('===== cron_resend_pos_orders_to_facturatool crearTicket result = %r',result)
-                ws_res = json.loads(result)
-                _logger.debug('===== cron_resend_pos_orders_to_facturatool crearTicket ws_res = %r',ws_res)
+                try:
+                    _logger.debug('===== cron_resend_pos_orders_to_facturatool crearTicket params = %r',params)
+                    result = client.service.crearTicket(params=params)
+                    _logger.debug('===== cron_resend_pos_orders_to_facturatool crearTicket result = %r',result)
+                    ws_res = json.loads(result)
+                    _logger.debug('===== cron_resend_pos_orders_to_facturatool crearTicket ws_res = %r',ws_res)
 
-                if ws_res['success'] == True:
-                    pos_order.write({
-                        'cfdi_ticket_state':'sync',
-                        'cfdi_ticket_id':ws_res['trans_id'],
-                        'cfdi_ticket_calls':0 #pos_order.cfdi_ticket_calls + 1,
-                    })
-                else:
-                    if ws_res['error'] is None:
-                        error = "Servicio temporalmente fuera de servicio"
+                    if ws_res['success'] == True:
+                        pos_order.write({
+                            'cfdi_ticket_state':'sync',
+                            'cfdi_ticket_id':ws_res['trans_id'],
+                            'cfdi_ticket_calls':0 #pos_order.cfdi_ticket_calls + 1,
+                        })
                     else:
-                        error = 'Error #' + str(ws_res['errno']) + ': ' + ws_res['error']
-                    pos_order.write({
-                        'cfdi_ticket_calls': pos_order.cfdi_ticket_calls + 1,
-                        'cfdi_ticket_call_error': error
-                    })
+                        if ws_res['error'] is None:
+                            error = "Servicio temporalmente fuera de servicio"
+                        else:
+                            error = 'Error #' + str(ws_res['errno']) + ': ' + ws_res['error']
+                        pos_order.write({
+                            'cfdi_ticket_calls': pos_order.cfdi_ticket_calls + 1,
+                            'cfdi_ticket_call_error': error
+                        })
+                except:
+                    _logger.debug('===== cron_resend_pos_orders_to_facturatool except****')
+                    pass
 
             elif pos_order.account_move.cfdi_state == 'done':
                 pos_order.write({
@@ -473,8 +487,7 @@ class PosOrder(models.Model):
                 })
     
     def cron_update_pos_orders_vs_facturatool(self):
-        wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-        client = zeep.Client(wsdl)
+        client = False
         ft_accounts = {}
 
         cron_obj = self.env['ir.cron'].search([('name','=','Update POS Orders vs FacturaTool Customer Panel')])[0]
@@ -497,6 +510,8 @@ class PosOrder(models.Model):
             
             if ft_account.rfc != False and pos_order.account_move.cfdi_state != 'done':
                 _logger.debug('===== cron_update_pos_orders_vs_facturatool pos_order.name = %r',pos_order.name)
+                if client == False:
+                    client = zeep.Client(ft_account.wsdl)
                 
                 params = {
                     'Rfc': ft_account.rfc,
@@ -504,33 +519,37 @@ class PosOrder(models.Model):
                     'Password': ft_account.password,
                     'TransID': pos_order.cfdi_ticket_id,
                 }
-                _logger.debug('===== cron_update_pos_orders_vs_facturatool statusTicket params = %r',params)
-                result = client.service.statusTicket(params=params)
-                _logger.debug('===== cron_update_pos_orders_vs_facturatool statusTicket result = %r',result)
-                ws_res = json.loads(result)
-                _logger.debug('===== cron_update_pos_orders_vs_facturatool statusTicket ws_res = %r',ws_res)
+                try:
+                    _logger.debug('===== cron_update_pos_orders_vs_facturatool statusTicket params = %r',params)
+                    result = client.service.statusTicket(params=params)
+                    _logger.debug('===== cron_update_pos_orders_vs_facturatool statusTicket result = %r',result)
+                    ws_res = json.loads(result)
+                    _logger.debug('===== cron_update_pos_orders_vs_facturatool statusTicket ws_res = %r',ws_res)
 
-                if ws_res['success'] == True:
-                    #Si el ticket ya fue timbrado por el cliente
-                    if ws_res['state'] == 'done':
-                        pos_order.write({
-                            'cfdi_ticket_state':'done',
-                            'cfdi_ticket_calls': 0,
-                            'cfdi_factura_id': ws_res['factura_id'],
-                        })
+                    if ws_res['success'] == True:
+                        #Si el ticket ya fue timbrado por el cliente
+                        if ws_res['state'] == 'done':
+                            pos_order.write({
+                                'cfdi_ticket_state':'done',
+                                'cfdi_ticket_calls': 0,
+                                'cfdi_factura_id': ws_res['factura_id'],
+                            })
+                        else:
+                            pos_order.write({
+                                'cfdi_ticket_calls': pos_order.cfdi_ticket_calls + 1
+                            })
                     else:
+                        if ws_res['error'] is None:
+                            error = "Servicio temporalmente fuera de servicio"
+                        else:
+                            error = 'Error #' + str(ws_res['errno']) + ': ' + ws_res['error']
                         pos_order.write({
-                            'cfdi_ticket_calls': pos_order.cfdi_ticket_calls + 1
+                            'cfdi_ticket_calls': pos_order.cfdi_ticket_calls + 1,
+                            'cfdi_ticket_call_error': error
                         })
-                else:
-                    if ws_res['error'] is None:
-                        error = "Servicio temporalmente fuera de servicio"
-                    else:
-                        error = 'Error #' + str(ws_res['errno']) + ': ' + ws_res['error']
-                    pos_order.write({
-                        'cfdi_ticket_calls': pos_order.cfdi_ticket_calls + 1,
-                        'cfdi_ticket_call_error': error
-                    })
+                except:
+                    _logger.debug('===== cron_update_pos_orders_vs_facturatool except****')
+                    pass
             elif pos_order.account_move.cfdi_state == 'done':
                 pos_order.write({
                     'cfdi_ticket_state':'done',

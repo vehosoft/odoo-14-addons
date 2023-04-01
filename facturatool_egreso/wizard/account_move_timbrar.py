@@ -12,13 +12,25 @@ class AccountMoveCfdiEgresoWizard(models.TransientModel):
     _description = "Timbrar CFDI de Egreso"
 
     @api.model
+    def _default_cfdi_regimen(self):
+        invoice = self.env['account.move'].browse(self._context.get('active_id'))
+        return invoice.partner_id.regimen_fiscal
+    
+    @api.model
+    def _default_cfdi_cp(self):
+        invoice = self.env['account.move'].browse(self._context.get('active_id'))
+        return invoice.partner_id.zip
+    
+    @api.model
     def _default_cfdi_uso(self):
         return self.env['sat.cfdi.uso'].search([('code','=','G02')], limit=1)
     
     @api.model
     def _default_cfdi_fecha(self):
         return fields.Date.context_today(self)
-
+    
+    cfdi_regimen = fields.Many2one('sat.regimen.fiscal', string="Regimen Fiscal del Receptor", required=True, default=_default_cfdi_regimen)
+    cfdi_cp = fields.Char(string='Domicilio Fiscal del Receptor', size=10, required=True, default=_default_cfdi_cp)
     cfdi_uso = fields.Many2one('sat.cfdi.uso', string="Uso del CFDI", required=True, default=_default_cfdi_uso)
     cfdi_fecha = fields.Date(string='Fecha de emision', copy=False, required=True, default=_default_cfdi_fecha)
     cfdi_hora = fields.Float('Hora de emision')
@@ -49,6 +61,8 @@ class AccountMoveCfdiEgresoWizard(models.TransientModel):
             if self.cfdi_tipo == 'DescBon':
                 tipo_relacion = '01'
             invoice.write({
+                'cfdi_regimen':self.cfdi_regimen.id,
+                'cfdi_cp':self.cfdi_cp,
                 'cfdi_uso':self.cfdi_uso.id,
                 'cfdi_fecha':self.cfdi_fecha,
                 'cfdi_hora':self.cfdi_hora,

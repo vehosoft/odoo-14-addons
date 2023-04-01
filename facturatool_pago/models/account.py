@@ -68,8 +68,7 @@ class AccountPayment(models.Model):
             msg = 'Error #8001: Necesita configurar su cuenta FacturaTool en "Contabilidad/Configuracion/Facturacion Electronica/Cuenta FacturaTool" para la empresa: '+payments[0].company_id.name
             raise UserError(msg)
 
-        wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-        client = zeep.Client(wsdl)
+        client = zeep.Client(ft_account.wsdl)
 
         for payment in payments:
             _logger.debug('===== action_timbrar_pago_cfdi payment = %r',payment)
@@ -81,6 +80,8 @@ class AccountPayment(models.Model):
             receptor = {
     			'Rfc': payment.partner_id.vat,
     			'Nombre': razon_social,
+    			'RegimenFiscal': payment.partner_id.regimen_fiscal.code,
+    			'DomicilioFiscal': payment.partner_id.zip,
     			'UsoCFDI': '000',
     		}
 
@@ -199,14 +200,13 @@ class AccountPayment(models.Model):
             
 
     def action_cancel_pago_cfdi(self):
-        wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-        client = zeep.Client(wsdl)
         for payment in self:
             ft_account = self.env['facturatool.account'].search([('rfc','!=',''),('company_id','=',payment.company_id.id)], limit=1)
             if ft_account.rfc == False:
                 msg = 'Error #8001: Necesita configurar su cuenta FacturaTool en "Contabilidad/Configuracion/Facturacion Electronica/Cuenta FacturaTool" para la empresa: '+payment.company_id.name
                 raise UserError(msg)
             #Solicitud al WS
+            client = zeep.Client(ft_account.wsdl)
             params = {
     			'Rfc': ft_account.rfc,
     			'Usuario': ft_account.username,

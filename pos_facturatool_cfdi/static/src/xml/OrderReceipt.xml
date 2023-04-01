@@ -21,6 +21,8 @@
         <xpath expr="//div[@class='pos-receipt']/div[@class='pos-receipt-contact']" position="inside">
             <t t-if="receipt.client and receipt.to_invoice">
                 <div><t t-esc="receipt.client.vat" /></div>
+                <div>Régimen Fiscal:<t t-esc="receipt.regimen_fiscal" /></div>
+                <div>Domicilio Fiscal:<t t-esc="receipt.domicilio_fiscal" /></div>
             </t>
             <t t-if="receipt.uso_cfdi and receipt.to_invoice">
                 <div>Uso del CFDI: <t t-esc="receipt.uso_cfdi" /></div>

@@ -29,8 +29,7 @@ class AccountMove(models.Model):
         ft_account = self.env['facturatool.account'].search([('rfc','!=',''),('company_id','=',invoices[0].company_id.id)], limit=1)
         client = False
         if ft_account.rfc != False and ft_account.rfc != '':
-            wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-            client = zeep.Client(wsdl)
+            client = zeep.Client(ft_account.wsdl)
 
         for invoice in invoices:
             if invoice.cfdi_state == 'done' and invoice.cfdi_global == True:

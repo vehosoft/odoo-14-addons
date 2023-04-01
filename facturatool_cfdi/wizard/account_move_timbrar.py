@@ -17,6 +17,16 @@ class AccountMoveCfdiWizard(models.TransientModel):
         return invoice.partner_id.cfdi_uso
     
     @api.model
+    def _default_cfdi_regimen(self):
+        invoice = self.env['account.move'].browse(self._context.get('active_id'))
+        return invoice.partner_id.regimen_fiscal
+    
+    @api.model
+    def _default_cfdi_cp(self):
+        invoice = self.env['account.move'].browse(self._context.get('active_id'))
+        return invoice.partner_id.zip
+    
+    @api.model
     def _default_cfdi_fecha(self):
         return fields.Date.context_today(self)
     
@@ -24,6 +34,7 @@ class AccountMoveCfdiWizard(models.TransientModel):
     def _default_cfdi_metodo_pago(self):
         invoice = self.env['account.move'].browse(self._context.get('active_id'))
         if invoice.cfdi_metodo_pago:
+            _logger.debug('===== _default_cfdi_metodo_pago invoice.cfdi_metodo_pago = %r',invoice.cfdi_metodo_pago)
             return invoice.cfdi_metodo_pago
         elif invoice.payment_state == 'paid':
             return 'PUE'
@@ -52,6 +63,8 @@ class AccountMoveCfdiWizard(models.TransientModel):
             return self.env['sat.forma.pago'].search([('code','=','99')], limit=1)
 
     cfdi_uso = fields.Many2one('sat.cfdi.uso', string="Uso del CFDI", required=True, default=_default_cfdi_uso)
+    cfdi_regimen = fields.Many2one('sat.regimen.fiscal', string="Regimen Fiscal del Receptor", required=True, default=_default_cfdi_regimen)
+    cfdi_cp = fields.Char(string='Domicilio Fiscal del Receptor', size=10, required=True, default=_default_cfdi_cp)
     cfdi_fecha = fields.Date(string='Fecha de emision', copy=False, required=True, default=_default_cfdi_fecha)
     cfdi_hora = fields.Float('Hora de emision')
     cfdi_serie = fields.Many2one('facturatool.serie', string="Serie", required=True,domain="[('company_id', '=', company_id)]")
@@ -73,6 +86,8 @@ class AccountMoveCfdiWizard(models.TransientModel):
             _logger.debug('===== action_timbrar_cfdi invoice = %r',invoice.name)
             invoice.write({
                 'cfdi_uso':self.cfdi_uso.id,
+                'cfdi_regimen':self.cfdi_regimen.id,
+                'cfdi_cp':self.cfdi_cp,
                 'cfdi_fecha':self.cfdi_fecha,
                 'cfdi_hora':self.cfdi_hora,
                 'cfdi_serie':self.cfdi_serie.id,

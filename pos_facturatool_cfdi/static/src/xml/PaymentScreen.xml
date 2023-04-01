@@ -36,16 +36,91 @@
 
         </div>
     </t>
+    <t t-name="RegimenFiscalPopup" owl="1">
+        <div role="dialog" class="modal-dialog">
+            <Draggable>
+                <div class="popup">
+                    <header class="title drag-handle">
+                        Regimen Fiscal
+                    </header>
+                    <div style="margin-top: 10px;margin-bottom: 10px;">
+                        
+                        <select class="detail needsclick" id="RegimenFiscal" name="RegimenFiscal" style="height: 40px; width:95%; box-shadow: 0px 0px 0px 3px #6ec89b;font-size: 16px;">
+                            <option value="" />
+                            <t t-foreach="props.array" t-as="regimen">
+                                <option
+                                    t-att-value="regimen.code"
+                                    t-att-selected="props.defaultRegimenFiscal == regimen.code ? true : undefined"
+                                >
+                                    <t t-esc="regimen.name" />
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+                    
+                    <footer class="footer centered">
+                        <div class="button cancel" t-on-mousedown.prevent="cancel">
+                            Cancel
+                        </div>
+                        <div class="button confirm" t-on-mousedown.prevent="confirm">
+                            Ok
+                        </div>
+                    </footer>
+                </div>
+            </Draggable>
 
+        </div>
+    </t>
+    <t t-name="DomicilioFiscalPopup" owl="1">
+        <div role="dialog" class="modal-dialog">
+            <Draggable>
+                <div class="popup">
+                    <header class="title drag-handle">
+                        Domicilio Fiscal
+                    </header>
+                    <div style="margin-top: 10px;margin-bottom: 10px;">
+                        
+                        <input type="text" class="detail needsclick" t-att-value="props.defaultDomicilioFiscal" id="DomicilioFiscal" name="DomicilioFiscal" placeholder="Ingresa el código postal" style="height: 40px;box-shadow: 0px 0px 0px 3px #6ec89b;font-size: 16px;"> 
+                        </input>
+                    </div>
+                    
+                    <footer class="footer centered">
+                        <div class="button cancel" t-on-mousedown.prevent="cancel">
+                            Cancel
+                        </div>
+                        <div class="button confirm" t-on-mousedown.prevent="confirm">
+                            Ok
+                        </div>
+                    </footer>
+                </div>
+            </Draggable>
+
+        </div>
+    </t>
     <t t-inherit="point_of_sale.PaymentScreen" t-inherit-mode="extension">
         <xpath expr="//div[hasclass('payment-controls')]" t-operation="inside">
             
             <div t-if="currentOrder.to_invoice" class="button js_invoice_uso"
                 t-att-class="{ highlight: currentOrder.have_uso_cfdi() }"
-                t-on-click="setUsoCFDI">
-                <i class="fa fa-file-text-o" /> Uso CFDI
+                t-on-click="setUsoCFDI" style="width:45%;float:right;">
+                Uso CFDI
             </div>
 
+            <div t-if="currentOrder.to_invoice" class="button js_regimen_fiscal"
+                t-att-class="{ highlight: currentOrder.have_regimen_fiscal() }"
+                t-on-click="setRegimenFiscal" style="width:45%;">
+                Régimen Fiscal
+            </div>
+
+            <div t-if="currentOrder.to_invoice" class="button js_domicilio_fiscal"
+                t-att-class="{ highlight: currentOrder.have_domicilio_fiscal() }"
+                t-on-click="setDomicilioFiscal">
+                Domicilio Fiscal
+            </div>
+
+            <div t-if="currentOrder.to_invoice and currentOrder.missing_data_cfdi() != ''" class="alert alert-danger" style="color:#dc3545!important;">
+                <i class="fa fa-warning"></i> Faltan datos: <span t-esc="currentOrder.missing_data_cfdi()"/>
+            </div>
         </xpath>
     </t>
 

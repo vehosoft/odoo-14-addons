@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
+        <!-- Uso de CFDI -->
         <record id="G01" model="sat.cfdi.uso">
             <field name="code">G01</field>
             <field name="name">Adquisicion de mercancias</field>
@@ -57,12 +58,96 @@
             <field name="code">D04</field>
             <field name="name">Donativos.</field>
         </record>
+        <record id="S01" model="sat.cfdi.uso">
+            <field name="code">S01</field>
+            <field name="name">Sin efectos fiscales.</field>
+        </record>
         <record id="P01" model="sat.cfdi.uso">
             <field name="code">P01</field>
             <field name="name">Por definir</field>
         </record>
+        <!--***********-->
 
+        <!-- Regimenes Fiscales -->
+        <record id="601" model="sat.regimen.fiscal">
+            <field name="code">601</field>
+            <field name="name">General de Ley Personas Morales</field>
+        </record>
+        <record id="603" model="sat.regimen.fiscal">
+            <field name="code">603</field>
+            <field name="name">Personas Morales con Fines no Lucrativos</field>
+        </record>
+        <record id="605" model="sat.regimen.fiscal">
+            <field name="code">605</field>
+            <field name="name">Sueldos y Salarios e Ingresos Asimilados a Salarios</field>
+        </record>
+        <record id="606" model="sat.regimen.fiscal">
+            <field name="code">606</field>
+            <field name="name">Arrendamiento</field>
+        </record>
+        <record id="607" model="sat.regimen.fiscal">
+            <field name="code">607</field>
+            <field name="name">Régimen de Enajenación o Adquisición de Bienes</field>
+        </record>
+        <record id="608" model="sat.regimen.fiscal">
+            <field name="code">608</field>
+            <field name="name">Demás ingresos</field>
+        </record>
+        <record id="610" model="sat.regimen.fiscal">
+            <field name="code">610</field>
+            <field name="name">Residentes en el Extranjero sin Establecimiento Permanente en México</field>
+        </record>
+        <record id="611" model="sat.regimen.fiscal">
+            <field name="code">611</field>
+            <field name="name">Ingresos por Dividendos (socios y accionistas)</field>
+        </record>
+        <record id="612" model="sat.regimen.fiscal">
+            <field name="code">612</field>
+            <field name="name">Personas Físicas con Actividades Empresariales y Profesionales</field>
+        </record>
+        <record id="614" model="sat.regimen.fiscal">
+            <field name="code">614</field>
+            <field name="name">Ingresos por intereses</field>
+        </record>
+        <record id="615" model="sat.regimen.fiscal">
+            <field name="code">615</field>
+            <field name="name">Régimen de los ingresos por obtención de premios</field>
+        </record>
+        <record id="616" model="sat.regimen.fiscal">
+            <field name="code">616</field>
+            <field name="name">Sin obligaciones fiscales</field>
+        </record>
+        <record id="620" model="sat.regimen.fiscal">
+            <field name="code">620</field>
+            <field name="name">Sociedades Cooperativas de Producción que optan por diferir sus ingresos</field>
+        </record>
+        <record id="621" model="sat.regimen.fiscal">
+            <field name="code">621</field>
+            <field name="name">Incorporación Fiscal</field>
+        </record>
+        <record id="622" model="sat.regimen.fiscal">
+            <field name="code">622</field>
+            <field name="name">Actividades Agrícolas, Ganaderas, Silvícolas y Pesqueras</field>
+        </record>
+        <record id="623" model="sat.regimen.fiscal">
+            <field name="code">623</field>
+            <field name="name">Opcional para Grupos de Sociedades</field>
+        </record>
+        <record id="624" model="sat.regimen.fiscal">
+            <field name="code">624</field>
+            <field name="name">Coordinados</field>
+        </record>
+        <record id="625" model="sat.regimen.fiscal">
+            <field name="code">625</field>
+            <field name="name">Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas</field>
+        </record>
+        <record id="626" model="sat.regimen.fiscal">
+            <field name="code">626</field>
+            <field name="name">Régimen Simplificado de Confianza</field>
+        </record>
+        <!--***********-->
 
+        <!-- Formas de Pago -->
         <record id="01" model="sat.forma.pago">
             <field name="code">01</field>
             <field name="name">Efectivo</field>
@@ -151,5 +236,6 @@
             <field name="code">99</field>
             <field name="name">Por definir</field>
         </record>
+        <!--***********-->
     </data>
 </odoo>

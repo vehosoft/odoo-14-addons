@@ -43,7 +43,8 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     cfdi_trans_id = fields.Char(string='FacturaTool TransID', size=30, copy=False)
-    cfdi_uso = fields.Many2one('sat.cfdi.uso', string="Uso del CFDI")
+    cfdi_regimen = fields.Many2one('sat.regimen.fiscal', string="Régimen Fiscal", copy=False)
+    cfdi_uso = fields.Many2one('sat.cfdi.uso', string="Uso del CFDI", copy=False)
     cfdi_state = fields.Selection([('draft', 'Sin Timbrar'), ('done', 'Trimbrado'), ('cancel', 'Cancelado'), ('canceling', 'Cancelando')], string='Status del CFDI', default='draft', copy=False, track_visibility='onchange')
     cfdi_fecha = fields.Date(string='Fecha Emision CFDI', readonly=True, index=True, copy=False)
     cfdi_hora = fields.Float('Hora Emision CFDI')
@@ -51,7 +52,7 @@ class AccountMove(models.Model):
     cfdi_serie = fields.Many2one('facturatool.serie', string="Serie")
     cfdi_folio = fields.Char(string='Folio', size=30, copy=False, track_visibility='onchange')
     cfdi_uuid = fields.Char(string='UUID', size=120, copy=False, track_visibility='onchange')
-    cfdi_metodo_pago = fields.Selection([('PUE', 'Pago en una sola exhibicion'), ('PPD', 'Pago en parcialidades o diferido')], string='Metodo de Pago', default='PUE')
+    cfdi_metodo_pago = fields.Selection([('PUE', 'Pago en una sola exhibicion'), ('PPD', 'Pago en parcialidades o diferido')], string='Metodo de Pago')
     cfdi_forma_pago = fields.Many2one('sat.forma.pago', string="Forma de Pago")
     cfdi_fecha_timbrado = fields.Datetime(string='Fecha de timbrado', copy=False, track_visibility='onchange')
     cfdi_xml = fields.Text('XML', copy=False)
@@ -61,8 +62,8 @@ class AccountMove(models.Model):
     cfdi_sello_digital = fields.Char(string='Sello Digital', size=600, copy=False)
     cfdi_sello_sat = fields.Char(string='Sello SAT', size=600, copy=False)
     cfdi_cadena_original = fields.Char(string='Cadena Original', size=600, copy=False)
-    #cfdi_codigo_qr = fields.Binary('Codigo QR', copy=False)
-    #cfdi_codigo_qr_path = fields.Char(string='Codigo QR Path', size=200, copy=False)
+    cfdi_cp = fields.Char(string='Domicilio Fiscal', size=10, copy=False)
+    cfdi_version = fields.Char(string='Version CFDI', size=5, copy=False, default='3.3')
 
     def _cfdi_hora_str(self):
         for record in self:
@@ -127,8 +128,7 @@ class AccountMove(models.Model):
             msg = 'Error #8001: Necesita configurar su cuenta FacturaTool en "Contabilidad/Configuracion/Facturacion Electronica/Cuenta FacturaTool" para la empresa: '+invoices[0].company_id.name
             raise UserError(msg)
 
-        wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-        client = zeep.Client(wsdl)
+        client = zeep.Client(ft_account.wsdl)
 
         for invoice in invoices:
             if invoice.partner_id.is_company == True:
@@ -139,6 +139,8 @@ class AccountMove(models.Model):
             receptor = {
     			'Rfc': invoice.partner_id.vat,
     			'Nombre': razon_social,
+    			'RegimenFiscal': invoice.cfdi_regimen.code,
+    			'DomicilioFiscal': invoice.cfdi_cp,
     			'UsoCFDI': invoice.cfdi_uso.code,
     		}
 
@@ -172,7 +174,6 @@ class AccountMove(models.Model):
                 if tax_include_on_price:
                     ValorUnitario = float(line.price_subtotal) / float(line.quantity)
                 concepto = {
-    				#'ClaveProdServ': line.clave_sat.code,
     				'ClaveProdServ': line.clave_sat.code,
     				'Cantidad': line.quantity,
     				'Descripcion': line.name,
@@ -180,7 +181,6 @@ class AccountMove(models.Model):
     				'Unidad': line.product_uom_id.name,
     				'ValorUnitario': ValorUnitario,
     				'Importe': line.price_subtotal,
-    				#'Redondeo': 'weikov',
                     'indexConcepto': iline
     			}
                 if line.number_ident != '' and line.number_ident != False:
@@ -202,7 +202,6 @@ class AccountMove(models.Model):
     			'Hora': invoice.cfdi_hora_str,
     			'FormaPago': invoice.cfdi_forma_pago.code,
     			'MetodoPago': invoice.cfdi_metodo_pago,
-    			#'TipoDeComprobante': 'I',
     			'Moneda': 'MXN',#factura.currency_id.name, hasta que se implemente timbrado para monedas distintas a MXN
     			'LugarExpedicion': invoice.company_id.zip,
     			'Receptor': receptor,
@@ -210,7 +209,6 @@ class AccountMove(models.Model):
     			'SubTotal': invoice.amount_untaxed,
     			'Total': invoice.amount_total,
     			'IdExterno': invoice.name+'_'+str(invoice.id),
-    			#'Redondeo': 'imp',
     		}
             if len(taxes) > 0:
                 params['Impuestos'] =  taxes
@@ -230,7 +228,7 @@ class AccountMove(models.Model):
                 status = True
 
                 cfdi = etree.fromstring(ws_res['xml'].encode('utf-8'))
-                ns = {'c':'http://www.sat.gob.mx/cfd/3','d':'http://www.sat.gob.mx/TimbreFiscalDigital'}
+                ns = {'c':'http://www.sat.gob.mx/cfd/4','d':'http://www.sat.gob.mx/TimbreFiscalDigital'}
                 nodoT=cfdi.xpath('c:Complemento ', namespaces=ns)
                 sello_digital = cfdi.get("Sello")
                 serie_csd = cfdi.get("NoCertificado")
@@ -242,23 +240,7 @@ class AccountMove(models.Model):
                     sello_sat = nodoAux[0].get("SelloSAT")
                 cadena_orginal = '||1.0|'+ws_res['uuid']+'|'+ws_res['fecha_timbrado']+'|'+invoice.cfdi_serie.name+str(ws_res['folio'])+'|'+sello_digital+'|'+serie_sat+'||'
 
-                #qr = qrcode.QRCode(
-    			#	version=1,
-    			#	error_correction=qrcode.constants.ERROR_CORRECT_L,
-    			#	box_size=4,
-    			#	border=1,
-    			#)
-                #qr.add_data("{'emisor':'"+ft_account.rfc+"','receptor':'"+receptor['Rfc']+"','total':'"+str(ws_res['total'])+"','uuid':'"+ws_res['uuid']+"','serie':'"+ws_res['serie']+"','folio':'"+str(ws_res['folio'])+"'}")
-                #qr.make(fit=True)
-                #imgQR = qr.make_image()
-                #fname=tempfile.NamedTemporaryFile(suffix='.png',delete=False)
-                #_logger.debug('===== action_timbrar_cfdi fname = %r',fname.name)
-                #imgQR.save(fname.name)
-                #f = open(fname.name, "r",encoding="latin-1")
-                #dataQR = f.read()
-                #f.close()
-                #_logger.debug('===== action_timbrar_cfdi dataQR = %r',dataQR.encode())
-                #_logger.debug('===== action_timbrar_cfdi dataQR = %r',base64.b64encode(dataQR.encode()))
+                
                 invoice.write({
     				'cfdi_state':'done',
     				'cfdi_trans_id':ws_res['trans_id'],
@@ -271,8 +253,7 @@ class AccountMove(models.Model):
     				'cfdi_sello_digital':sello_digital,
     				'cfdi_serie_csd':serie_csd,
     				'cfdi_cadena_original':str(cadena_orginal),
-    				#'cfdi_codigo_qr':base64.b64encode(dataQR.encode()),
-    				#'cfdi_codigo_qr_path':fname.name,
+    				'cfdi_version':'4.0',
     			})
 
                 filename=ft_account.rfc+'_'
@@ -301,13 +282,12 @@ class AccountMove(models.Model):
         return {'params': params,'status': status}
 
     def action_cancel_cfdi(self):
-        wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-        client = zeep.Client(wsdl)
         for invoice in self:
             ft_account = self.env['facturatool.account'].search([('rfc','!=',''),('company_id','=',invoice.company_id.id)], limit=1)
             if ft_account.rfc == False:
                 msg = 'Error #8001: Necesita configurar su cuenta FacturaTool en "Contabilidad/Configuracion/Facturacion Electronica/Cuenta FacturaTool" para la empresa: '+invoice.company_id.name
                 raise UserError(msg)
+            client = zeep.Client(ft_account.wsdl)
             #Solicitud al WS
             params = {
     			'Rfc': ft_account.rfc,

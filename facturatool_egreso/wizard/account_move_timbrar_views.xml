@@ -9,6 +9,8 @@
                         Se genera un CFDI de Egreso version 3.3 valido ante el SAT. Por favor revise detenidamente los datos antes de emitir el CFDI.
                     </p>
                     <group>
+                        <field name="cfdi_regimen"/>
+                        <field name="cfdi_cp"/>
                         <field name="cfdi_uso"/>
                         <field name="cfdi_fecha"/>
                         <field name="cfdi_hora" widget="float_time"/>

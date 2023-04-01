@@ -97,6 +97,8 @@ class PosOrder(models.Model):
         if cfdi_uso == False:
             cfdi_uso = self.partner_id.cfdi_uso.id
         vals['cfdi_uso'] = cfdi_uso
+        vals['cfdi_regimen'] = self.partner_id.regimen_fiscal.id
+        vals['cfdi_cp'] = self.partner_id.zip
         vals['cfdi_fecha'] = date_order.strftime("%Y-%m-%d")
         vals['cfdi_hora'] = hora + minuto
         vals['cfdi_serie'] = self.session_id.config_id.cfdi_serie.id or False

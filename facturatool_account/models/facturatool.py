@@ -15,16 +15,16 @@ class FacturaToolAccount(models.Model):
 	_description = 'Cuenta FacturaTool'
 	rfc = fields.Char(string='RFC', size=13, index=True,
 					   required=True)
-	username = fields.Char(string='Email', size=60, index=True,
+	username = fields.Char(string='Email', size=80, index=True,
 					   required=True)
-	password = fields.Char(string='Password', size=60, index=True,
+	password = fields.Char(string='Password', size=120, index=True,
 					   required=True)
+	wsdl = fields.Char(string='WSDL', size=200, required=True, default='http://ws.facturatool.com/index.php?wsdl')
 	validate = fields.Boolean(string='Validada', default=False, readonly=True)
 	company_id = fields.Many2one('res.company', string='Compañia', store=True, required=True, default=lambda self: self.env.company)
 
 	def action_validate(self):
-		wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-		client = zeep.Client(wsdl)
+		client = zeep.Client(self.wsdl)
 		params = {
 			'Rfc': self.rfc,
 			'Usuario': self.username,
@@ -65,6 +65,20 @@ class SatCFDIUso(models.Model):
 		for uso in self:
 			name = str(uso.code) + ' - ' + str(uso.name)
 			resp.append((uso.id, name))
+		return resp
+
+	code = fields.Char(string='Clave', size=3, index=True,required=True)
+	name = fields.Char(string='Descripcion', size=80, index=True,required=True)
+
+class SatRegimenFiscal(models.Model):
+	_name = 'sat.regimen.fiscal'
+	_description = 'Regimen Fiscal'
+
+	def name_get(self):
+		resp = []
+		for regimen in self:
+			name = str(regimen.code) + ' - ' + str(regimen.name)
+			resp.append((regimen.id, name))
 		return resp
 
 	code = fields.Char(string='Clave', size=3, index=True,required=True)

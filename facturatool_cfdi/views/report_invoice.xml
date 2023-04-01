@@ -13,8 +13,14 @@
 									<div t-if="o.partner_id.company_type=='person' " t-field="o.partner_id.name"/>
 									<div t-if="o.partner_id.company_type=='company'" t-field="o.partner_id.razon_social"/>
 									<div t-if="o.partner_id.vat">RFC: <span t-field="o.partner_id.vat"/></div>
-									<div style="font-size: 11px;" t-if="(o.move_type == 'out_invoice' or o.move_type == 'out_refund') and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
+									<div style="font-size: 11px;" t-if="(o.move_type == 'out_invoice' or o.move_type == 'out_refund') and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel') and o.cfdi_version=='4.0'">
+											Régimen Fiscal: <span t-field="o.cfdi_regimen.code"/> - <span t-field="o.cfdi_regimen.name"/>
+									</div>
+									<div style="font-size: 11px;" t-if="(o.move_type == 'out_invoice' or o.move_type == 'out_refund') and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel') and o.cfdi_version!='4.0'">
 										<span t-field="o.partner_id.street"/>, <span t-field="o.partner_id.city"/>, <span t-field="o.partner_id.state_id.name"/> , <span t-field="o.partner_id.country_id.name"/>, C.P. <span t-field="o.partner_id.zip"/>
+									</div>
+									<div style="font-size: 11px;" t-if="(o.move_type == 'out_invoice' or o.move_type == 'out_refund') and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel') and o.cfdi_version=='4.0'">
+										Domicilio Fiscal: <span t-field="o.partner_id.zip"/>
 									</div>
 									<div style="font-size: 11px;" t-if="(o.move_type == 'out_invoice' or o.move_type == 'out_refund') and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
 											USO CFDI: <span t-field="o.cfdi_uso.code"/> - <span t-field="o.cfdi_uso.name"/>
@@ -153,17 +159,13 @@
 											</tr>
 											<tr t-foreach="line.tax_ids" t-as="tax" t-if="not line.display_type and (o.move_type == 'out_invoice' or o.move_type == 'out_refund') and (o.cfdi_state == 'done' or o.cfdi_state == 'cancel')">
 												<t t-set="tax_importe" t-value="tax.amount * line.price_subtotal"/>
-												<td></td>
-												<td></td>
-												<td></td>
 												<td t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
 												</td>
-												<td class="text-right">
-													<div style="font-size: 11px;">Impuesto: <t t-esc="tax.clave_sat"/> <t t-esc="tax.name"/></div>
-													<div style="font-size: 11px;">TipoFactor: <t t-esc="tax.tipo_factor_sat"/></div>
+												<td colspan="4" class="text-right">
+													<div style="font-size: 11px;">Impuesto: <t t-esc="tax.clave_sat"/> <t t-esc="tax.name"/>, TipoFactor: <t t-esc="tax.tipo_factor_sat"/>, TasaOCuota: <t t-esc="tax.amount"/>, </div>
+													
 												</td>
-												<td class="o_price_total text-right" colspan="2">
-													<div style="font-size: 11px;">TasaOCuota: <t t-esc="tax.amount"/></div>
+												<td class="o_price_total text-left" colspan="2">
 													<div style="font-size: 11px;">Importe: <t t-esc="tax_importe"/></div>
 												</td>
 											</tr>

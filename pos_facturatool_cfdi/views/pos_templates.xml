@@ -9,6 +9,12 @@
                 type="text/javascript" src="/pos_facturatool_cfdi/static/src/js/Popups/UsoCFDIPopup.js"
             />
             <script
+                type="text/javascript" src="/pos_facturatool_cfdi/static/src/js/Popups/RegimenFiscalPopup.js"
+            />
+            <script
+                type="text/javascript" src="/pos_facturatool_cfdi/static/src/js/Popups/DomicilioFiscalPopup.js"
+            />
+            <script
                 type="text/javascript" src="/pos_facturatool_cfdi/static/src/js/Screens/PaymentScreen.js"
             />
         </xpath>

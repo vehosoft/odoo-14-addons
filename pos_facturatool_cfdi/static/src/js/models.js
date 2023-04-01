@@ -2,7 +2,7 @@ odoo.define("pos_facturatool_cfdi.models", function (require) {
     "use strict";
 
     const models = require("point_of_sale.models");
-    models.load_fields("res.partner", ["cfdi_uso"]);
+    models.load_fields("res.partner", ["cfdi_uso","regimen_fiscal"]);
     models.load_fields("res.company", ["zip"]);
     models.load_fields("product.product", ["clave_sat"]);
 
@@ -15,6 +15,19 @@ odoo.define("pos_facturatool_cfdi.models", function (require) {
             loaded: function(self, usosCFDI) {
                 self.db.usosCFDI = usosCFDI;
                 self.db.usosCFDI_by_code = usosCFDI.reduce(
+                    (map, rec) => ((map[rec.code] = rec), map),
+                    {}
+                );
+            },
+        },
+        {
+            model: "sat.regimen.fiscal",
+            label: "RegimenFiscal",
+            before: "res.partner",
+            fields: ["code", "name"],
+            loaded: function(self, RegimenFiscal) {
+                self.db.RegimenFiscal = RegimenFiscal;
+                self.db.RegimenFiscal_by_code = RegimenFiscal.reduce(
                     (map, rec) => ((map[rec.code] = rec), map),
                     {}
                 );
@@ -128,6 +141,8 @@ odoo.define("pos_facturatool_cfdi.models", function (require) {
             var initialize_resp = OrderSuper.initialize.apply(this, arguments);
             this.order_name = '';
             this.uso_cfdi = '';
+            this.regimen_fiscal = '';
+            this.domicilio_fiscal = '';
             this.account_move = false;
             //return OrderSuper.initialize.call(this, attributes,options);
             return initialize_resp;
@@ -142,6 +157,41 @@ odoo.define("pos_facturatool_cfdi.models", function (require) {
         have_uso_cfdi: function(){
             if(this.uso_cfdi!='') return true;
             else return false;
+        },
+        set_regimen_fiscal: function(value) {
+            this.regimen_fiscal = value;
+        },
+        get_regimen_fiscal: function() {
+            console.log(this);
+            return this.regimen_fiscal;
+        },
+        have_regimen_fiscal: function(){
+            if(this.regimen_fiscal!='') return true;
+            else return false;
+        },
+        set_domicilio_fiscal: function(value) {
+            this.domicilio_fiscal = value;
+        },
+        get_domicilio_fiscal: function() {
+            return this.domicilio_fiscal;
+        },
+        have_domicilio_fiscal: function(){
+            if(this.domicilio_fiscal!='') return true;
+            else return false;
+        },
+        have_customer_rfc: function(){
+            var client = this.get('client')
+            if(client && client.vat!=='' && client.vat !== false && client.vat !== null) return true;
+            else return false;
+        },
+        missing_data_cfdi: function(){
+            let missing_data = '';
+            if(!this.have_customer_rfc()) missing_data+='RFC, ';
+            if(!this.have_regimen_fiscal()) missing_data+='Régimen F., ';
+            if(!this.have_uso_cfdi()) missing_data+='Uso CFDI, ';
+            if(!this.have_domicilio_fiscal()) missing_data+='Domicilio F., ';
+            if(missing_data.length > 2) missing_data = missing_data.substring(0, missing_data.length - 2);
+            return missing_data;
         },
         export_as_JSON: function() {
             var json = OrderSuper.export_as_JSON.apply(this, arguments);
@@ -163,6 +213,8 @@ odoo.define("pos_facturatool_cfdi.models", function (require) {
             console.log(receipt);
             //if(this.to_invoice){
                 receipt.to_invoice = this.to_invoice;
+                receipt.regimen_fiscal = this.have_regimen_fiscal() ? this.regimen_fiscal : '';
+                receipt.domicilio_fiscal = this.have_domicilio_fiscal() ? this.domicilio_fiscal : '';
                 receipt.uso_cfdi = this.uso_cfdi;
                 receipt.account_move = this.account_move;
                 if(this.account_move && this.to_invoice){

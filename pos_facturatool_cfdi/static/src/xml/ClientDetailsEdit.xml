@@ -15,6 +15,19 @@
                     </t>
                 </select>
             </div>
+            <div class="client-detail">
+                <span class="label">Regimen Fiscal</span>
+                <select class="detail client-regimen-fiscal needsclick" name="regimen_fiscal"
+                        t-on-change="captureChange">
+                    <option value="">None</option>
+                    <t t-foreach="env.pos.db.RegimenFiscal" t-as="RF" t-key="RF.id">
+                        <option t-att-value="RF.id"
+                                t-att-selected="props.partner.regimen_fiscal ? ((RF.id === props.partner.regimen_fiscal[0]) ? true : undefined) : undefined">
+                            <t t-esc="RF.name" />
+                        </option>
+                    </t>
+                </select>
+            </div>
         </xpath> 
     </t>
 

@@ -69,8 +69,7 @@ class AccountMove(models.Model):
             msg = 'Error #8001: Necesita configurar su cuenta FacturaTool en "Contabilidad/Configuracion/Facturacion Electronica/Cuenta FacturaTool" para la empresa: '+invoices[0].company_id.name
             raise UserError(msg)
 
-        wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-        client = zeep.Client(wsdl)
+        client = zeep.Client(ft_account.wsdl)
 
         for invoice in invoices:
             if invoice.partner_id.is_company == True:
@@ -100,6 +99,8 @@ class AccountMove(models.Model):
             receptor = {
     			'Rfc': invoice.partner_id.vat,
     			'Nombre': razon_social,
+                'RegimenFiscal': invoice.cfdi_regimen.code,
+    			'DomicilioFiscal': invoice.cfdi_cp,
     			'UsoCFDI': invoice.cfdi_uso.code,
     		}
 
@@ -133,7 +134,6 @@ class AccountMove(models.Model):
                 if tax_include_on_price:
                     ValorUnitario = float(line.price_subtotal) / float(line.quantity)
                 concepto = {
-    				#'ClaveProdServ': line.clave_sat.code,
     				'ClaveProdServ': line.clave_sat.code,
     				'Cantidad': line.quantity,
     				'Descripcion': line.name,
@@ -141,7 +141,6 @@ class AccountMove(models.Model):
     				'Unidad': line.product_uom_id.name,
     				'ValorUnitario': ValorUnitario,
     				'Importe': line.price_subtotal,
-    				#'Redondeo': 'weikov',
                     'indexConcepto': iline
     			}
                 if line.number_ident != '' and line.number_ident != False:
@@ -186,7 +185,7 @@ class AccountMove(models.Model):
                 status = True
 
                 cfdi = etree.fromstring(ws_res['xml'].encode('utf-8'))
-                ns = {'c':'http://www.sat.gob.mx/cfd/3','d':'http://www.sat.gob.mx/TimbreFiscalDigital'}
+                ns = {'c':'http://www.sat.gob.mx/cfd/4','d':'http://www.sat.gob.mx/TimbreFiscalDigital'}
                 nodoT=cfdi.xpath('c:Complemento ', namespaces=ns)
                 sello_digital = cfdi.get("Sello")
                 serie_csd = cfdi.get("NoCertificado")
@@ -211,6 +210,7 @@ class AccountMove(models.Model):
     				'cfdi_sello_digital':sello_digital,
     				'cfdi_serie_csd':serie_csd,
     				'cfdi_cadena_original':str(cadena_orginal),
+                    'cfdi_version':'4.0',
     			})
 
                 filename=ft_account.rfc+'_'
@@ -239,14 +239,13 @@ class AccountMove(models.Model):
         return {'params': params,'status': status}
 
     def action_cancel_cfdi_egreso(self):
-        wsdl = 'http://ws.facturatool.com/index.php?wsdl'
-        client = zeep.Client(wsdl)
         for invoice in self:
             ft_account = self.env['facturatool.account'].search([('rfc','!=',''),('company_id','=',invoice.company_id.id)], limit=1)
             if ft_account.rfc == False:
                 msg = 'Error #8001: Necesita configurar su cuenta FacturaTool en "Contabilidad/Configuracion/Facturacion Electronica/Cuenta FacturaTool" para la empresa: '+invoice.company_id.name
                 raise UserError(msg)
             #Solicitud al WS
+            client = zeep.Client(ft_account.wsdl)
             params = {
     			'Rfc': ft_account.rfc,
     			'Usuario': ft_account.username,
