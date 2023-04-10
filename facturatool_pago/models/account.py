@@ -140,7 +140,7 @@ class AccountPayment(models.Model):
             if ws_res['success'] == True:
                 status = True
                 cfdi = etree.fromstring(ws_res['xml'].encode('utf-8'))
-                ns = {'c':'http://www.sat.gob.mx/cfd/3','d':'http://www.sat.gob.mx/TimbreFiscalDigital'}
+                ns = {'c':'http://www.sat.gob.mx/cfd/4','d':'http://www.sat.gob.mx/TimbreFiscalDigital'}
                 nodoT=cfdi.xpath('c:Complemento ', namespaces=ns)
                 sello_digital = cfdi.get("Sello")
                 serie_csd = cfdi.get("NoCertificado")
